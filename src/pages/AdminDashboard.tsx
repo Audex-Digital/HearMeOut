@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Shield, Users, MessageSquare, AlertTriangle, Trash2, UserX, Clock, Check, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Shield, Users, AlertTriangle, Trash2, Clock, Check} from 'lucide-react';
+import { motion} from 'framer-motion';
 import { useAuth } from '../auth/AuthContext';
 import { db } from '../firebase/config';
-import { collection, query, getDocs, doc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { collection, query, getDocs, doc, deleteDoc} from 'firebase/firestore';
 
 interface UserData {
   uid: string;
@@ -15,7 +15,7 @@ interface UserData {
 }
 
 const AdminDashboard: React.FC = () => {
-  const { user: currentUser } = useAuth();
+  const {} = useAuth();
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'dummy'>('all');
