@@ -10,6 +10,7 @@ const Signup: React.FC = () => {
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { signup } = useAuth();
   const navigate = useNavigate();
 
@@ -32,10 +33,24 @@ const Signup: React.FC = () => {
     }
 
     try {
+      setError('');
+      setIsSubmitting(true);
       await signup(email, password, username);
       navigate('/feed');
-    } catch (err) {
-      setError('Signup failed. Please try again.');
+    } catch (err: any) {
+      if (err.code === 'auth/email-already-in-use') {
+        setError('This email is already in use. Try logging in instead.');
+      } else if (err.code === 'auth/weak-password') {
+        setError('Password is too weak. Please use at least 6 characters.');
+      } else if (err.code === 'auth/invalid-email') {
+        setError('Invalid email address.');
+      } else if (err.code === 'firestore/creation-failed') {
+        setError('Account created! However, we couldn\'t set up your profile. Please try logging in to complete setup.');
+      } else {
+        setError('Signup failed: ' + (err.message || 'Please check your connection and try again.'));
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -160,9 +175,10 @@ const Signup: React.FC = () => {
                 </button>
                 <button 
                   type="submit"
-                  className="flex-[2] bg-gradient-to-br from-primary to-accent text-white py-4 rounded-xl font-bold shadow-lg shadow-primary-glow hover:translate-y-[-2px] transition-all"
+                  disabled={isSubmitting}
+                  className="flex-[2] bg-gradient-to-br from-primary to-accent text-white py-4 rounded-xl font-bold shadow-lg shadow-primary-glow hover:translate-y-[-2px] transition-all disabled:opacity-50 disabled:translate-y-0"
                 >
-                  Create Account
+                  {isSubmitting ? "Creating Account..." : "Create Account"}
                 </button>
               </div>
             </motion.form>

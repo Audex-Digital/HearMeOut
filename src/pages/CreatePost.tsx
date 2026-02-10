@@ -2,20 +2,36 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Send, X, ShieldAlert } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
+import { db } from '../firebase/config';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const CreatePost: React.FC = () => {
   const [content, setContent] = useState('');
   const [isPosting, setIsPosting] = useState(false);
+  const { user } = useAuth();
   const navigate = useNavigate();
   const charLimit = 300;
 
   const handlePost = async () => {
-    if (!content.trim()) return;
+    if (!content.trim() || !user) return;
     setIsPosting(true);
-    // Simulate API call
-    await new Promise(r => setTimeout(r, 800));
-    setIsPosting(false);
-    navigate('/feed');
+    
+    try {
+      await addDoc(collection(db, 'posts'), {
+        content: content.trim(),
+        authorId: user.uid,
+        username: user.username,
+        createdAt: serverTimestamp(),
+        likes: 0
+      });
+      navigate('/feed');
+    } catch (error) {
+      console.error("Error creating post:", error);
+      alert("Failed to create post. Please try again.");
+    } finally {
+      setIsPosting(false);
+    }
   };
 
   return (

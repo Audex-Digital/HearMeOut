@@ -14,11 +14,14 @@ const EditProfile: React.FC = () => {
 
   const handleSave = async () => {
     setIsSaving(true);
-    // Simulate API call
-    await new Promise(r => setTimeout(r, 500));
-    updateProfile({ bio });
-    setIsSaving(false);
-    navigate('/profile');
+    try {
+      await updateProfile({ bio });
+      navigate('/profile');
+    } catch (err) {
+      console.error("Failed to update profile", err);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (

@@ -15,10 +15,17 @@ const Login: React.FC = () => {
     e.preventDefault();
     if (!email || !password) return setError('Please fill in all fields');
     try {
+      setError('');
       await login(email, password);
       navigate('/feed');
-    } catch (err) {
-      setError('Invalid credentials');
+    } catch (err: any) {
+      if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
+        setError('Invalid email or password');
+      } else if (err.code === 'auth/too-many-requests') {
+        setError('Too many failed attempts. Please try again later.');
+      } else {
+        setError('Login failed: ' + (err.message || 'Please try again.'));
+      }
     }
   };
 

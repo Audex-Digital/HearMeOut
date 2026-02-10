@@ -9,6 +9,8 @@ import EditProfile from './pages/EditProfile';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import CreatePost from './pages/CreatePost';
+import AdminDashboard from './pages/AdminDashboard';
+import FriendRequestNotification from './components/Notifications/FriendRequestNotification';
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -21,6 +23,21 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   );
   
   if (!user) return <Navigate to="/login" replace />;
+  
+  return <>{children}</>;
+};
+
+// Admin Only Route Component
+const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, isAdmin, loading } = useAuth();
+  
+  if (loading) return (
+    <div className="min-h-screen bg-hmo-dark flex items-center justify-center">
+      <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  );
+  
+  if (!user || !isAdmin) return <Navigate to="/feed" replace />;
   
   return <>{children}</>;
 };
@@ -42,6 +59,7 @@ const AppContent: React.FC = () => {
     <Router>
       <div className="bg-hmo-dark min-h-screen text-slate-200 selection:bg-primary/30">
         <Navbar />
+        <FriendRequestNotification />
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
@@ -53,6 +71,7 @@ const AppContent: React.FC = () => {
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
           <Route path="/create-post" element={<ProtectedRoute><CreatePost /></ProtectedRoute>} />
+          <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
 
           {/* Catch all */}
           <Route path="*" element={<Navigate to={user ? "/feed" : "/"} replace />} />
