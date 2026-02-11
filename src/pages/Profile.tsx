@@ -36,6 +36,8 @@ import { db } from '../firebase/config';
 import { doc, getDoc } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 import { alertService } from '../utils/sweetalert';
+import Footer from '../components/Footer/Footer';
+
 
 /** Simplified user data used for rendering lists of friends/requests. */
 interface UserProfile {
@@ -514,6 +516,7 @@ const Profile: React.FC = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

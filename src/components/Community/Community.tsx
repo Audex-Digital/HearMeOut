@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import './Community.css';
 
 const Community: React.FC = () => {
@@ -57,17 +58,12 @@ const Community: React.FC = () => {
           >
             Ready to find your safe space?
           </motion.h3>
-          <motion.button 
+          <Link 
+            to="/signup"
             className="inline-flex items-center justify-center bg-gradient-to-br from-indigo-600 to-violet-600 px-8 py-4 sm:px-12 sm:py-5 rounded-full text-base sm:text-lg font-bold text-white shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/30 transition-all"
-            whileHover={{ scale: 1.05, y: -2 }}
-            whileTap={{ scale: 0.95 }}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.4 }}
           >
             Join the Community Today
-          </motion.button>
+          </Link>
         </div>
       </div>
     </section>

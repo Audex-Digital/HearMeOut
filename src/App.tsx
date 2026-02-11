@@ -27,6 +27,10 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import CreatePost from './pages/CreatePost';
 import AdminDashboard from './pages/AdminDashboard';
+import Contact from './pages/Contact';
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
+
 import NotificationSystem from './components/Notifications/NotificationSystem';
 import { Toaster } from 'react-hot-toast';
 
@@ -98,6 +102,12 @@ const AppContent: React.FC = () => {
         <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
         <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
+        
+        {/* --- Public Informational Routes --- */}
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
+
 
         {/* --- Authenticated Routes --- */}
         <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />

@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import './Hero.css';
 
 const Hero: React.FC = () => {
@@ -50,12 +51,18 @@ const Hero: React.FC = () => {
               transition={{ duration: 0.5, delay: 0.3 }}
               className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-10 sm:mb-12"
             >
-              <button className="w-full sm:w-auto flex items-center justify-center gap-3 bg-gradient-to-br from-primary to-violet-600 px-8 py-4 sm:px-10 sm:py-5 rounded-full text-base sm:text-lg font-bold text-white shadow-xl shadow-primary/20 hover:shadow-primary/40 transition-all hover:translate-y-[-2px]">
+              <Link 
+                to="/signup" 
+                className="w-full sm:w-auto flex items-center justify-center gap-3 bg-gradient-to-br from-primary to-violet-600 px-8 py-4 sm:px-10 sm:py-5 rounded-full text-base sm:text-lg font-bold text-white shadow-xl shadow-primary/20 hover:shadow-primary/40 transition-all hover:translate-y-[-2px]"
+              >
                 Start Sharing <ArrowRight size={20} />
-              </button>
-              <button className="w-full sm:w-auto px-8 py-4 sm:px-10 sm:py-5 rounded-full text-base sm:text-lg font-bold text-slate-300 hover:text-white bg-white/5 border border-white/10 hover:bg-white/10 transition-all">
+              </Link>
+              <Link 
+                to="/#about" 
+                className="w-full sm:w-auto px-8 py-4 sm:px-10 sm:py-5 rounded-full text-base sm:text-lg font-bold text-slate-300 hover:text-white bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-center"
+              >
                 Learn More
-              </button>
+              </Link>
             </motion.div>
 
             <motion.div 

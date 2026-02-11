@@ -1,5 +1,6 @@
 import React from 'react';
 import { Heart } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import './Footer.css';
 
 const Footer: React.FC = () => {
@@ -22,25 +23,25 @@ const Footer: React.FC = () => {
           <div className="footer-col">
             <h4>PLATFORM</h4>
             <ul>
-              <li><a href="#how-it-works">How it Works</a></li>
-              <li><a href="#safety">Safety Guidelines</a></li>
-              <li><a href="#rules">Community Rules</a></li>
+              <li><Link to="/#how-it-works">How it Works</Link></li>
+              <li><Link to="/#safety">Safety Guidelines</Link></li>
+              <li><Link to="/#rules">Community Rules</Link></li>
             </ul>
           </div>
           <div className="footer-col">
             <h4>RESOURCES</h4>
             <ul>
-              <li><a href="#support">Mental Health Support</a></li>
-              <li><a href="#blog">Blog</a></li>
-              <li><a href="#contact">Contact Us</a></li>
+              <li><Link to="/#support">Mental Health Support</Link></li>
+              <li><Link to="/#blog">Blog</Link></li>
+              <li><Link to="/contact">Contact Us</Link></li>
             </ul>
           </div>
           <div className="footer-col">
             <h4>LEGAL</h4>
             <ul>
-              <li><a href="#privacy">Privacy Policy</a></li>
-              <li><a href="#terms">Terms of Service</a></li>
-              <li><a href="#cookies">Cookie Policy</a></li>
+              <li><Link to="/privacy">Privacy Policy</Link></li>
+              <li><Link to="/terms">Terms of Service</Link></li>
+              <li><Link to="/#cookies">Cookie Policy</Link></li>
             </ul>
           </div>
         </div>
