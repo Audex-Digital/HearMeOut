@@ -82,8 +82,8 @@ service cloud.firestore {
     // USERNAMES COLLECTION (Uniqueness reservation)
     // -------------------------------------------------------------------------
     match /usernames/{lowercaseUsername} {
-      // Required for availability checks
-      allow read: if isAuth();
+      // Required for availability checks (publicly accessible)
+      allow read: if true;
       // Only the owner can create a reservation
       allow create: if isAuth() && isOwner(request.resource.data.uid);
       // Only the owner can delete a reservation

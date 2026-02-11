@@ -15,12 +15,14 @@
  * - useAuth (Signup logic & state)
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Lock, User, UserPlus, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Mail, Lock, UserPlus, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import UsernameInput from '../components/auth/UsernameInput';
+
 
 const Signup: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -29,24 +31,9 @@ const Signup: React.FC = () => {
   const [isAvailable, setIsAvailable] = useState<'yes' | 'no' | 'checking' | null>(null);
   const [loading, setLoading] = useState(false);
   
-  const { signup, checkUsernameAvailability } = useAuth();
+  const { signup } = useAuth();
   const navigate = useNavigate();
 
-  /** Real-time availability check with debounce. */
-  useEffect(() => {
-    if (!username || username.length < 3) {
-      setIsAvailable(null);
-      return;
-    }
-
-    setIsAvailable('checking');
-    const timer = setTimeout(async () => {
-      const available = await checkUsernameAvailability(username);
-      setIsAvailable(available ? 'yes' : 'no');
-    }, 600);
-
-    return () => clearTimeout(timer);
-  }, [username]);
 
   /** 
    * Orchestrates the registration flow.
@@ -59,6 +46,7 @@ const Signup: React.FC = () => {
     e.preventDefault();
     if (!email || !password || !username) return toast.error("All details are required.");
     if (username.length < 3) return toast.error("Username must be 3+ characters.");
+    if (isAvailable === 'checking') return toast.error("Still verifying username...");
     if (isAvailable === 'no') return toast.error("This username is already taken.");
     if (password.length < 6) return toast.error("Security: Password must be 6+ characters.");
     
@@ -100,27 +88,13 @@ const Signup: React.FC = () => {
         </header>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Username Input */}
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Unique Username</label>
-            <div className="relative group">
-              <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-white transition-colors" size={20} />
-              <input 
-                type="text" 
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="yourhandle"
-                className={`w-full bg-hmo-dark border ${isAvailable === 'no' ? 'border-red-500/50' : isAvailable === 'yes' ? 'border-green-500/50' : 'border-hmo-border'} rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-white/50 focus:ring-4 focus:ring-white/5 transition-all text-sm font-medium`}
-              />
-              {/* Availability Indicator */}
-              <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                {isAvailable === 'checking' && <div className="w-4 h-4 border-2 border-slate-500 border-t-transparent rounded-full animate-spin"></div>}
-                {isAvailable === 'yes' && <div className="text-green-500 text-xs font-black uppercase tracking-tighter">Free</div>}
-                {isAvailable === 'no' && <div className="text-red-500 text-xs font-black uppercase tracking-tighter">Taken</div>}
-              </div>
-            </div>
-            {isAvailable === 'no' && <p className="text-[9px] text-red-400 font-bold ml-1 uppercase">Choose a different handle</p>}
-          </div>
+          <UsernameInput 
+            value={username}
+            onChange={setUsername}
+            onAvailabilityChange={setIsAvailable}
+            isAvailable={isAvailable}
+          />
+
 
           {/* Email Input */}
           <div className="space-y-2">

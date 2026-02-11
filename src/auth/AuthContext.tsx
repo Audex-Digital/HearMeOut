@@ -40,6 +40,8 @@ import { auth, db } from '../firebase/config';
 import toast from 'react-hot-toast';
 import { getDoc as firestoreGetDoc } from 'firebase/firestore';
 import { deleteUser } from 'firebase/auth';
+import { checkUsernameAvailability as checkAvailabilityUtil } from '../utils/checkUsernameAvailability';
+
 
 /**
  * Interface representing the custom application-specific user data
@@ -203,26 +205,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  /** Utility to check if a username is already taken. Returns true if available. */
+  /** 
+   * Utility to check if a username is already taken. 
+   * Returns true if available, false if taken.
+   */
   const checkUsernameAvailability = async (username: string): Promise<boolean> => {
-    if (!username || username.length < 3) return false;
-    const lower = username.toLowerCase();
+    // We can also add context-aware logic here (like checking if it's the current user's name)
+    // but for now we'll stick to the global utility as requested.
     try {
-      const nameRef = doc(db, 'usernames', lower);
-      const nameSnap = await firestoreGetDoc(nameRef);
-      return !nameSnap.exists();
+      const available = await checkAvailabilityUtil(username);
+      
+      // Edge Case: If user is logged in (e.g. updating profile), 
+      // check if it's already theirs
+      if (!available && auth.currentUser) {
+        const lower = username.trim().toLowerCase();
+        const nameRef = doc(db, 'usernames', lower);
+        const nameSnap = await firestoreGetDoc(nameRef);
+        if (nameSnap.exists() && nameSnap.data().uid === auth.currentUser.uid) {
+          return true;
+        }
+      }
+      return available;
     } catch (err) {
-      console.error("Availability check failed:", err);
-      return false;
+      throw err; // Let caller handle "Unknown" states
     }
   };
 
   /** Registers new user, creates their Firestore profile, and sends verification. */
   const signup = async (email: string, pass: string, username: string) => {
-    const lowerUsername = username.toLowerCase();
+    const trimmedUsername = username.trim();
+    const lowerUsername = trimmedUsername.toLowerCase();
     
     // Step 1: Pre-emptive uniqueness check
-    const isAvailable = await checkUsernameAvailability(username);
+    const isAvailable = await checkUsernameAvailability(trimmedUsername);
     if (!isAvailable) {
       throw new Error("This username is already taken. Please choose another.");
     }
@@ -243,7 +258,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const userData = {
           uid: firebaseUser.uid,
           email: email,
-          username: username,
+          username: trimmedUsername,
           usernameLowercase: lowerUsername,
           memberSince: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
           createdAt: serverTimestamp(),
