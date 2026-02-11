@@ -23,7 +23,7 @@ import {
   Clock, 
   Check 
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useAuth } from '../auth/AuthContext';
 import { db } from '../firebase/config';
@@ -42,7 +42,7 @@ interface UserData {
 }
 
 const AdminDashboard: React.FC = () => {
-  const { user: currentUser } = useAuth();
+  const { } = useAuth();
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'dummy'>('all');

@@ -25,7 +25,6 @@ import {
   serverTimestamp, 
   collection, 
   addDoc,
-  getDoc,
   runTransaction,
   increment
 } from 'firebase/firestore';

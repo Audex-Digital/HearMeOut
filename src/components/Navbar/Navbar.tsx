@@ -31,7 +31,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { db } from '../../firebase/config';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import NotificationPanel from '../Notifications/NotificationPanel';
-import toast from 'react-hot-toast';
+// import toast from 'react-hot-toast';
 
 const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
