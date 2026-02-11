@@ -134,48 +134,50 @@ const Feed: React.FC = () => {
   };
 
   return (
-    <div className="pt-28 pb-10 min-h-screen bg-hmo-dark">
-      <div className="container mx-auto px-4 max-w-2xl">
-        {/* Page Header */}
-        <header className="mb-8 flex justify-between items-end">
-          <div>
-            <h1 className="text-2xl font-bold text-white mb-2">Community Feed</h1>
-            <p className="text-slate-400 text-sm">Real thoughts from real people.</p>
-          </div>
-          {isAdmin && (
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-full">
-              <ShieldAlert size={14} className="text-primary" />
-              <span className="text-[10px] font-bold text-primary uppercase tracking-wider">Admin Privileges</span>
+    <div className="flex flex-col min-h-screen bg-hmo-dark">
+      <div className="flex-grow pt-28 pb-10">
+        <div className="container mx-auto px-4 max-w-2xl">
+          {/* Page Header */}
+          <header className="mb-8 flex justify-between items-end">
+            <div>
+              <h1 className="text-2xl font-bold text-white mb-2">Community Feed</h1>
+              <p className="text-slate-400 text-sm">Real thoughts from real people.</p>
             </div>
-          )}
-        </header>
+            {isAdmin && (
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-full">
+                <ShieldAlert size={14} className="text-primary" />
+                <span className="text-[10px] font-bold text-primary uppercase tracking-wider">Admin Privileges</span>
+              </div>
+            )}
+          </header>
 
-        {/* Content Area */}
-        <div className="space-y-6">
-          {loading ? (
-            <div className="flex justify-center py-20">
-              <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-            </div>
-          ) : posts.length > 0 ? (
-            posts.map((post) => (
-              <PostCard 
-                key={post.id}
-                post={post}
-                isAdmin={isAdmin}
-                onDelete={handleDeletePost}
-                onSendFriendRequest={handleSendRequest}
-                onCancelFriendRequest={handleCancelRequest}
-                requesting={requestingId === post.authorId}
-                onOpenComments={(p) => setActivePostForComments(p)}
-              />
-            ))
-          ) : (
-            <div className="text-center py-20 px-6 bg-hmo-card border border-dashed border-hmo-border rounded-3xl">
-              <p className="text-slate-400 text-lg italic">
-                {!user ? "Please log in to view the community." : "The community is quiet right now. Check back soon."}
-              </p>
-            </div>
-          )}
+          {/* Content Area */}
+          <div className="space-y-6">
+            {loading ? (
+              <div className="flex justify-center py-20">
+                <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            ) : posts.length > 0 ? (
+              posts.map((post) => (
+                <PostCard 
+                  key={post.id}
+                  post={post}
+                  isAdmin={isAdmin}
+                  onDelete={handleDeletePost}
+                  onSendFriendRequest={handleSendRequest}
+                  onCancelFriendRequest={handleCancelRequest}
+                  requesting={requestingId === post.authorId}
+                  onOpenComments={(p) => setActivePostForComments(p)}
+                />
+              ))
+            ) : (
+              <div className="text-center py-20 px-6 bg-hmo-card border border-dashed border-hmo-border rounded-3xl">
+                <p className="text-slate-400 text-lg italic">
+                  {!user ? "Please log in to view the community." : "The community is quiet right now. Check back soon."}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

@@ -57,12 +57,12 @@ const Hero: React.FC = () => {
               >
                 Start Sharing <ArrowRight size={20} />
               </Link>
-              <Link 
-                to="/#about" 
+              <a 
+                href="#about" 
                 className="w-full sm:w-auto px-8 py-4 sm:px-10 sm:py-5 rounded-full text-base sm:text-lg font-bold text-slate-300 hover:text-white bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-center"
               >
                 Learn More
-              </Link>
+              </a>
             </motion.div>
 
             <motion.div 
@@ -76,7 +76,7 @@ const Hero: React.FC = () => {
                   <div key={i} className="w-8 h-8 rounded-full border-2 border-hmo-dark bg-slate-800" />
                 ))}
               </div>
-              <span className="text-sm text-slate-500 font-medium">Joined others today</span>
+              <span className="text-sm text-slate-500 font-medium">Join others today</span>
             </motion.div>
           </div>
 
