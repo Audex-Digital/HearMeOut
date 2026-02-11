@@ -1,3 +1,19 @@
+/**
+ * App.tsx
+ * 
+ * The root container of the application.
+ * Orchestrates:
+ * - Application-wide routing (React Router v6).
+ * - Provider injection (AuthContext).
+ * - Layout assembly (Navbar, Toaster, NotificationSystem).
+ * - Route-level access control (Protected, Admin, and Public-only routes).
+ * 
+ * Dependencies:
+ * - react-router-dom (Routing)
+ * - react-hot-toast (Global alerts)
+ * - useAuth (Authentication guard logic)
+ */
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './auth/AuthContext';
@@ -5,14 +21,19 @@ import Navbar from './components/Navbar/Navbar';
 import Landing from './pages/Landing';
 import Feed from './pages/Feed';
 import Profile from './pages/Profile';
+import UserProfile from './pages/UserProfile';
 import EditProfile from './pages/EditProfile';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import CreatePost from './pages/CreatePost';
 import AdminDashboard from './pages/AdminDashboard';
-import FriendRequestNotification from './components/Notifications/FriendRequestNotification';
+import NotificationSystem from './components/Notifications/NotificationSystem';
+import { Toaster } from 'react-hot-toast';
 
-// Protected Route Component
+/**
+ * Higher-Order Component to restrict access to authenticated users only.
+ * Redirects unauthenticated traffic to /login.
+ */
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
   
@@ -27,7 +48,10 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return <>{children}</>;
 };
 
-// Admin Only Route Component
+/**
+ * Higher-Order Component to restrict access to Admin-level users only.
+ * Redirects unauthorized traffic to the general /feed.
+ */
 const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isAdmin, loading } = useAuth();
   
@@ -42,7 +66,11 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return <>{children}</>;
 };
 
-// Public Only Route Component (Logged out only)
+/**
+ * Higher-Order Component for routes that should ONLY be visible while logged out
+ * (e.g. Login, Signup, Landing). 
+ * Redirects authenticated users to /feed.
+ */
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
   
@@ -52,40 +80,58 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return <>{children}</>;
 };
 
+/**
+ * Main application layout and routing table.
+ */
 const AppContent: React.FC = () => {
   const { user } = useAuth();
 
   return (
-    <Router>
-      <div className="bg-hmo-dark min-h-screen text-slate-200 selection:bg-primary/30">
-        <Navbar />
-        <FriendRequestNotification />
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
-          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-          <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
+    <div className="bg-hmo-dark min-h-screen text-slate-200 selection:bg-primary/30">
+      {/* Global UI Overlays */}
+      <Toaster position="bottom-right" />
+      <Navbar />
+      <NotificationSystem />
 
-          {/* Protected Routes */}
-          <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-          <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
-          <Route path="/create-post" element={<ProtectedRoute><CreatePost /></ProtectedRoute>} />
-          <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+      <Routes>
+        {/* --- Unauthenticated Routes --- */}
+        <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
+        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+        <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
 
-          {/* Catch all */}
-          <Route path="*" element={<Navigate to={user ? "/feed" : "/"} replace />} />
-        </Routes>
-      </div>
-    </Router>
+        {/* --- Authenticated Routes --- */}
+        <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
+        
+        {/* Public profile view using username handle */}
+        <Route path="/profile/:username" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
+        
+        {/* Current user's private dashboard */}
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        
+        <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
+        <Route path="/create-post" element={<ProtectedRoute><CreatePost /></ProtectedRoute>} />
+        
+        {/* --- Administrative Routes --- */}
+        <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+
+        {/* Fallback Catch-all: Redirects to context-appropriate home */}
+        <Route path="*" element={<Navigate to={user ? "/feed" : "/"} replace />} />
+      </Routes>
+    </div>
   );
 };
 
+/**
+ * Root Component.
+ * Wraps the entire tree in the Router and AuthProvider.
+ */
 function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <Router>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </Router>
   );
 }
 

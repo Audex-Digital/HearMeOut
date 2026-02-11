@@ -21,7 +21,7 @@ const Hero: React.FC = () => {
               transition={{ duration: 0.5 }}
               className="inline-block px-4 py-2 bg-white/5 border border-white/10 rounded-full text-xs sm:text-sm font-medium text-accent mb-6 sm:mb-8"
             >
-              100% Anonymous & Safe
+              Anonymous & Safe
             </motion.div>
             
             <motion.h1
@@ -69,7 +69,7 @@ const Hero: React.FC = () => {
                   <div key={i} className="w-8 h-8 rounded-full border-2 border-hmo-dark bg-slate-800" />
                 ))}
               </div>
-              <span className="text-sm text-slate-500 font-medium">Joined by 10,000+ others today</span>
+              <span className="text-sm text-slate-500 font-medium">Joined others today</span>
             </motion.div>
           </div>
 

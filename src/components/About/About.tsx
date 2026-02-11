@@ -8,7 +8,7 @@ const About: React.FC = () => {
     {
       icon: <EyeOff size={24} />,
       title: "Total Anonymity",
-      description: "No names, no profile pictures, no public identity. Share your story without the pressure of it being attached to \"you\"."
+      description: "No real names, no profile pictures, no public identity. Share your story without the pressure of it being attached to \"you\"."
     },
     {
       icon: <ShieldCheck size={24} />,
