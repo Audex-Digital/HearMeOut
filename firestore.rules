@@ -28,6 +28,12 @@ service cloud.firestore {
       return request.auth.uid == uid;
     }
 
+    /** Check if the authenticated user is an administrator. */
+    function isAdmin() {
+      return isAuth() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
     // -------------------------------------------------------------------------
     // POSTS COLLECTION
     // -------------------------------------------------------------------------
@@ -41,7 +47,9 @@ service cloud.firestore {
       // Update post permission:
       // 1. Owners can update their own post content, but cannot cheat the like count.
       // 2. Any logged-in user can update ONLY the 'likes' or 'commentCount' field (via transactions).
+      // 3. Admins can update anything.
       allow update: if isAuth() && (
+        isAdmin() ||
         (isOwner(resource.data.authorId) && 
           !request.resource.data.diff(resource.data).affectedKeys().hasAny(['likes', 'commentCount'])
         )
@@ -49,22 +57,20 @@ service cloud.firestore {
         (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'commentCount']))
       );
 
-      // Only the author can delete their post.
-      allow delete: if isAuth() && isOwner(resource.data.authorId);
+      // Only the author or an admin can delete their post.
+      allow delete: if isAuth() && (isOwner(resource.data.authorId) || isAdmin());
 
       // --- Likes Subcollection ---
-      // Used for tracking if a specific user has liked a post (idempotency).
       match /likes/{likeId} {
         allow read: if isAuth();
-        // Users can only create/delete their own like document.
-        allow create: if isAuth() && isOwner(likeId);
-        allow delete: if isAuth() && isOwner(likeId);
+        allow create, delete: if isAuth() && isOwner(likeId);
       }
 
       // --- Comments Subcollection ---
-      // Replies to a specific post.
       match /comments/{commentId} {
-        allow read, write: if isAuth();
+        allow read: if isAuth();
+        allow create: if isAuth();
+        allow update, delete: if isAuth() && (isOwner(resource.data.authorId) || isAdmin());
       }
     }
 
@@ -72,36 +78,77 @@ service cloud.firestore {
     // USERS COLLECTION
     // -------------------------------------------------------------------------
     match /users/{userId} {
-      // Users can see other users (required for showing usernames in feed).
+      // Users can see other users.
       allow read: if isAuth();
-      // Users can only modify their own data (profiles, bio, friend lists).
-      allow write: if isAuth() && isOwner(userId);
+      
+      // Update User Logic.
+      allow update: if isAuth() && (
+        isAdmin() ||
+        (isOwner(userId) && 
+          request.resource.data.role == resource.data.role &&
+          (
+            (resource.data.role == 'listener' && request.resource.data.diff(resource.data).affectedKeys().hasAny(['listenerActive'])) ||
+            (request.resource.data.listenerActive == resource.data.listenerActive)
+          ) &&
+          (
+            (resource.data.listenerStatus == 'none' && request.resource.data.listenerStatus == 'pending') ||
+            (request.resource.data.listenerStatus == resource.data.listenerStatus)
+          )
+        )
+      );
+
+      // --- Bookmarks Subcollection ---
+      // Users can only manage their own bookmarks.
+      match /bookmarks/{postId} {
+        allow read, write: if isAuth() && isOwner(userId);
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // ROOMS COLLECTION (Premium Feature Scaffolding)
+    // -------------------------------------------------------------------------
+    match /rooms/{roomId} {
+      allow read: if isAuth();
+      allow create: if isAuth() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isPremium == true;
+      allow update, delete: if isAuth() && (isOwner(resource.data.ownerId) || isAdmin());
     }
 
     // -------------------------------------------------------------------------
     // USERNAMES COLLECTION (Uniqueness reservation)
     // -------------------------------------------------------------------------
     match /usernames/{lowercaseUsername} {
-      // Required for availability checks (publicly accessible)
       allow read: if true;
-      // Only the owner can create a reservation
       allow create: if isAuth() && isOwner(request.resource.data.uid);
-      // Only the owner can delete a reservation
       allow delete: if isAuth() && isOwner(resource.data.uid);
+    }
+
+    // -------------------------------------------------------------------------
+    // CHATS COLLECTION
+    // -------------------------------------------------------------------------
+    match /chats/{chatId} {
+      allow read: if isAuth() && (request.auth.uid in resource.data.participants || isAdmin());
+      allow create: if isAuth();
+      allow update: if isAuth() && (request.auth.uid in resource.data.participants || isAdmin());
+
+      // --- Messages Subcollection ---
+      match /messages/{messageId} {
+        // Use the participants list from the parent chat document.
+        allow read: if isAuth() && (get(/databases/$(database)/documents/chats/$(chatId)).data.participants.hasAny([request.auth.uid]) || isAdmin());
+        allow create: if isAuth() && get(/databases/$(database)/documents/chats/$(chatId)).data.participants.hasAny([request.auth.uid]);
+        allow update, delete: if isAdmin();
+      }
     }
 
     // -------------------------------------------------------------------------
     // NOTIFICATIONS COLLECTION
     // -------------------------------------------------------------------------
     match /notifications/{notificationId} {
-      // Any authenticated user can trigger a notification (e.g., liking a post).
       allow create: if isAuth();
-      // Only the recipient can view, mark as read, or dismiss their notifications.
       allow read, update, delete: if isAuth() && isOwner(resource.data.recipientId);
     }
 
     // -------------------------------------------------------------------------
-    // FRIEND REQUESTS COLLECTION (Generic fallback if using dedicated collection)
+    // FRIEND REQUESTS COLLECTION
     // -------------------------------------------------------------------------
     match /friend_requests/{docId} {
       allow read, write: if isAuth();

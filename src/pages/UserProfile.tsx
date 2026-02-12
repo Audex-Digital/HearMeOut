@@ -258,9 +258,12 @@ const UserProfile: React.FC = () => {
                   </Link>
                 ) : socialState === 'friends' ? (
                   <>
-                    <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white rounded-xl text-xs font-bold shadow-lg shadow-primary/20">
+                    <button 
+                      onClick={() => navigate(`/chat/${targetUser.uid}`)}
+                      className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white rounded-xl text-xs font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-all"
+                    >
                       <MessageSquare size={16} />
-                      Whisper
+                      Chat
                     </button>
                     <button 
                       onClick={handleDisconnect}

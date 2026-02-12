@@ -17,7 +17,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, X, Bell, Heart, MessageCircle } from 'lucide-react';
+import { Check, X, Bell, Heart, MessageCircle, Headphones, ShieldCheck, UserPlus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../auth/AuthContext';
@@ -36,10 +36,13 @@ import {
 /** Structure of the notification document. */
 interface Notification {
   id: string;
-  type: 'like' | 'comment' | 'friend_request';
-  fromUserId: string;
-  fromUsername: string;
+  type: 'like' | 'comment' | 'friend_request' | 'chat_message' | 'listener_application' | 'listener_approved' | 'listener_rejected';
+  fromUserId?: string;
+  fromUsername?: string;
+  applicantUid?: string;
+  applicantUsername?: string;
   postId?: string;
+  text?: string;
   read: boolean;
   createdAt: any;
 }
@@ -50,10 +53,9 @@ const NotificationSystem: React.FC = () => {
 
   /**
    * Real-time stream for UNREAD notifications.
-   * Only active for verified, non-anonymous users.
    */
   useEffect(() => {
-    if (!user?.emailVerified || user?.isAnonymous) {
+    if (!user) {
       setNotifications([]);
       return;
     }
@@ -76,12 +78,29 @@ const NotificationSystem: React.FC = () => {
       },
       error: (error) => {
         console.error("Real-time notification error:", error);
-        toast.error("Failed to sync new alerts.");
       }
     });
 
     return () => unsubscribe();
-  }, [user?.uid, user?.emailVerified]);
+  }, [user?.uid]);
+
+  /**
+   * AUTO-DISMISS LOGIC
+   * Automatically marks notifications as read after 5 seconds to prevent them from
+   * sticking on screen indefinitely.
+   */
+  useEffect(() => {
+    if (notifications.length > 0) {
+      const timers = notifications.map(notif => {
+        // Set a 5-second timer for each incoming high-priority notification
+        return setTimeout(() => {
+          markAsRead(notif.id);
+        }, 5000);
+      });
+
+      return () => timers.forEach(t => clearTimeout(t));
+    }
+  }, [notifications]);
 
   /** Marks a specific notification as 'read', removing it from this component's view. */
   const markAsRead = async (id: string) => {
@@ -89,7 +108,6 @@ const NotificationSystem: React.FC = () => {
       await updateDoc(doc(db, 'notifications', id), { read: true });
     } catch (err) {
       console.error("Manual mark-as-read failed:", err);
-      toast.error("Update failed.");
     }
   };
 
@@ -98,9 +116,10 @@ const NotificationSystem: React.FC = () => {
    * Logic: Executes the social logic first, then marks the notification as read.
    */
   const handleAction = async (notif: Notification, action: 'accept' | 'reject' | 'read') => {
-    if (notif.type === 'friend_request') {
-      if (action === 'accept') await acceptFriendRequest(notif.fromUserId);
-      if (action === 'reject') await rejectFriendRequest(notif.fromUserId);
+    if (notif.type === 'friend_request' && notif.fromUserId) {
+      const senderUid = notif.fromUserId;
+      if (action === 'accept') await acceptFriendRequest(senderUid);
+      if (action === 'reject') await rejectFriendRequest(senderUid);
     }
     await markAsRead(notif.id);
   };
@@ -120,25 +139,52 @@ const NotificationSystem: React.FC = () => {
               <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
                 notif.type === 'like' ? 'bg-pink-500/10 text-pink-500' : 
                 notif.type === 'comment' ? 'bg-accent/10 text-accent' : 
+                notif.type === 'listener_application' ? 'bg-yellow-500/10 text-yellow-500' :
+                notif.type === 'listener_approved' ? 'bg-green-500/10 text-green-500' :
+                notif.type === 'listener_rejected' ? 'bg-red-500/10 text-red-500' :
                 'bg-primary/10 text-primary'
               }`}>
                 {notif.type === 'like' && <Heart size={18} fill="currentColor" />}
                 {notif.type === 'comment' && <MessageCircle size={18} />}
-                {notif.type === 'friend_request' && <Bell size={18} />}
+                {notif.type === 'chat_message' && <MessageCircle size={18} className="text-indigo-400" />}
+                {notif.type === 'friend_request' && <UserPlus size={18} />}
+                {notif.type === 'listener_application' && <Headphones size={18} />}
+                {notif.type === 'listener_approved' && <ShieldCheck size={18} />}
+                {notif.type === 'listener_rejected' && <X size={18} />}
               </div>
               
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-slate-300 leading-snug">
-                  <Link 
-                    to={`/profile/@${notif.fromUsername}`}
-                    onClick={() => markAsRead(notif.id)}
-                    className="text-white font-bold hover:underline"
-                  >
-                    {notif.fromUsername}
-                  </Link>
+                  {notif.fromUsername && (
+                    <Link 
+                      to={notif.type === 'chat_message' ? `/chat/${notif.fromUserId}` : `/profile/@${notif.fromUsername}`}
+                      onClick={() => markAsRead(notif.id)}
+                      className="text-white font-bold hover:underline"
+                    >
+                      {notif.fromUsername}
+                    </Link>
+                  )}
+                  {notif.applicantUsername && (
+                    <Link 
+                      to={`/chat/${notif.applicantUid}?evaluate=true`}
+                      onClick={() => markAsRead(notif.id)}
+                      className="text-white font-bold hover:underline"
+                    >
+                      {notif.applicantUsername}
+                    </Link>
+                  )}
                   {notif.type === 'like' && ' supported your post'}
                   {notif.type === 'comment' && ' replied to your post'}
+                  {notif.type === 'chat_message' && (
+                    <>
+                      {' sent a message: '}
+                      <span className="text-slate-400 italic">"{notif.text}"</span>
+                    </>
+                  )}
                   {notif.type === 'friend_request' && ' wants to connect'}
+                  {notif.type === 'listener_application' && ' applied for Listener role'}
+                  {notif.type === 'listener_approved' && 'Your listener application was approved! 🎉'}
+                  {notif.type === 'listener_rejected' && 'Your listener application was rejected.'}
                 </p>
                 <span className="text-[10px] text-slate-500 mt-1 block">Just now</span>
               </div>

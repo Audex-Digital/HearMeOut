@@ -25,6 +25,9 @@ import { alertService } from '../utils/sweetalert';
 import Footer from '../components/Footer/Footer';
 
 
+import LoggedLayout from '../components/Layout/LoggedLayout';
+import QuickPost from '../components/Feed/QuickPost';
+
 /** Core post data structure used in the feed. */
 interface Post {
   id: string;
@@ -45,8 +48,6 @@ const Feed: React.FC = () => {
 
   /**
    * Main Post Listener.
-   * Logic: Subscribes to the 50 most recent posts.
-   * Accessible by both verified and guest (anonymous) users.
    */
   useEffect(() => {
     if (!user) {
@@ -85,10 +86,8 @@ const Feed: React.FC = () => {
 
   /** 
    * Initiates a friend request with UI loading state. 
-   * @param targetUid - The user to connect with.
    */
   const handleSendRequest = async (targetUid: string) => {
-    // Permission Guard: Guests/Unverified users cannot connect.
     if (!user?.emailVerified || user?.isAnonymous) {
       toast.error("Verify your email to connect with others.");
       return;
@@ -118,7 +117,6 @@ const Feed: React.FC = () => {
 
   /** 
    * Deletes a post (Admin only feature).
-   * Logic: Requests user confirmation before calling Firestore deleteDoc.
    */
   const handleDeletePost = async (postId: string) => {
     if (!user?.emailVerified || !isAdmin) return;
@@ -134,60 +132,55 @@ const Feed: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-hmo-dark">
-      <div className="flex-grow pt-28 pb-10">
-        <div className="container mx-auto px-4 max-w-2xl">
-          {/* Page Header */}
-          <header className="mb-8 flex justify-between items-end">
-            <div>
-              <h1 className="text-2xl font-bold text-white mb-2">Community Feed</h1>
-              <p className="text-slate-400 text-sm">Real thoughts from real people.</p>
+    <LoggedLayout>
+      <div className="max-w-2xl mx-auto">
+        {isAdmin && (
+          <div className="mb-6 flex items-center gap-3 px-6 py-4 bg-primary/10 border border-primary/20 rounded-3xl group transition-all hover:bg-primary/20">
+            <div className="w-10 h-10 rounded-2xl bg-primary/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+              <ShieldAlert size={20} />
             </div>
-            {isAdmin && (
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-full">
-                <ShieldAlert size={14} className="text-primary" />
-                <span className="text-[10px] font-bold text-primary uppercase tracking-wider">Admin Privileges</span>
-              </div>
-            )}
-          </header>
-
-          {/* Content Area */}
-          <div className="space-y-6">
-            {loading ? (
-              <div className="flex justify-center py-20">
-                <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-              </div>
-            ) : posts.length > 0 ? (
-              posts.map((post) => (
-                <PostCard 
-                  key={post.id}
-                  post={post}
-                  isAdmin={isAdmin}
-                  onDelete={handleDeletePost}
-                  onSendFriendRequest={handleSendRequest}
-                  onCancelFriendRequest={handleCancelRequest}
-                  requesting={requestingId === post.authorId}
-                  onOpenComments={(p) => setActivePostForComments(p)}
-                />
-              ))
-            ) : (
-              <div className="text-center py-20 px-6 bg-hmo-card border border-dashed border-hmo-border rounded-3xl">
-                <p className="text-slate-400 text-lg italic">
-                  {!user ? "Please log in to view the community." : "The community is quiet right now. Check back soon."}
-                </p>
-              </div>
-            )}
+            <div>
+              <h2 className="text-sm font-black text-white uppercase tracking-wider">Moderation Mode</h2>
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">You have administrative privileges in this feed.</p>
+            </div>
           </div>
+        )}
+        <QuickPost />
+
+        <div className="space-y-4">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 gap-4">
+              <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-slate-500 text-xs font-bold uppercase tracking-widest animate-pulse">Syncing Feed...</p>
+            </div>
+          ) : posts.length > 0 ? (
+            posts.map((post) => (
+              <PostCard 
+                key={post.id}
+                post={post}
+                isAdmin={isAdmin}
+                onDelete={handleDeletePost}
+                onSendFriendRequest={handleSendRequest}
+                onCancelFriendRequest={handleCancelRequest}
+                requesting={requestingId === post.authorId}
+                onOpenComments={(p) => setActivePostForComments(p)}
+              />
+            ))
+          ) : (
+            <div className="text-center py-20 px-8 bg-hmo-card border border-dashed border-hmo-border rounded-[2.5rem]">
+              <p className="text-slate-500 text-base font-medium italic">
+                {!user ? "Please log in to view the community." : "The community is quiet right now. Check back soon."}
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Shared Overlay for viewing replies on any post */}
       <CommentModal 
         post={activePostForComments} 
         onClose={() => setActivePostForComments(null)} 
       />
-      <Footer />
-    </div>
+    </LoggedLayout>
   );
 };
 

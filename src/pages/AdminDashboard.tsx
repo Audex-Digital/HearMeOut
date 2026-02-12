@@ -21,10 +21,14 @@ import {
   AlertTriangle, 
   Trash2, 
   Clock, 
-  Check 
+  Check,
+  MessageSquare,
+  Headphones,
+  XCircle
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { db } from '../firebase/config';
 import { collection, query, getDocs, doc, deleteDoc, getDoc, writeBatch, serverTimestamp } from 'firebase/firestore';
@@ -39,13 +43,16 @@ interface UserData {
   role: string;
   createdAt: any;
   bio?: string;
+  listenerStatus?: string;
+  listenerActive?: boolean;
 }
 
 const AdminDashboard: React.FC = () => {
-  const { } = useAuth();
+  const { approveListener, rejectListener } = useAuth();
+  const navigate = useNavigate();
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'dummy'>('all');
+  const [filter, setFilter] = useState<'all' | 'dummy' | 'applications'>('all');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [isMigrating, setIsMigrating] = useState(false);
 
@@ -57,7 +64,7 @@ const AdminDashboard: React.FC = () => {
       const querySnapshot = await getDocs(q);
       const fetchedUsers: UserData[] = [];
       querySnapshot.forEach((doc) => {
-        fetchedUsers.push(doc.data() as UserData);
+        fetchedUsers.push({ uid: doc.id, ...doc.data() } as UserData);
       });
       setUsers(fetchedUsers);
     } catch (error) {
@@ -124,6 +131,28 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  /** Approves a listener application. */
+  const handleApprove = async (uid: string) => {
+    setActionLoading(uid);
+    try {
+      await approveListener(uid);
+      await fetchUsers();
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  /** Rejects a listener application. */
+  const handleReject = async (uid: string) => {
+    setActionLoading(uid);
+    try {
+      await rejectListener(uid);
+      await fetchUsers();
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   /** Initial load of community data. */
   useEffect(() => {
     fetchUsers();
@@ -131,10 +160,6 @@ const AdminDashboard: React.FC = () => {
 
   /** 
    * Simple heuristic to identify potentially inactive or spam accounts.
-   * Logic: 
-   * - Missing a handle.
-   * - Contains specific substrings (test, dummy, spam).
-   * - Over 30 days old with zero bio content.
    */
   const isDummy = (u: UserData) => {
     if (!u.username) return true;
@@ -151,12 +176,14 @@ const AdminDashboard: React.FC = () => {
   };
 
   /** Computed list of users based on the active tab filter. */
-  const filteredUsers = filter === 'dummy' ? users.filter(isDummy) : users;
+  const filteredUsers = filter === 'dummy' 
+    ? users.filter(isDummy) 
+    : filter === 'applications'
+    ? users.filter(u => u.listenerStatus === 'pending')
+    : users;
 
   /** 
    * Removes a specific user's Firestore profile. 
-   * @remarks 
-   * This does NOT delete their Auth credentials (requires Admin SDK / Cloud Function).
    */
   const handleDeleteUser = async (uid: string) => {
     const confirmed = await alertService.delete('this user profile');
@@ -177,8 +204,8 @@ const AdminDashboard: React.FC = () => {
 
   const stats = [
     { label: 'Total Users', value: users.length.toString(), icon: <Users size={20} />, color: 'text-blue-500' },
-    { label: 'Dummy Accounts', value: users.filter(isDummy).length.toString(), icon: <AlertTriangle size={20} />, color: 'text-red-500' },
-    { label: 'Admin Access', value: users.filter(u => u.role === 'admin').length.toString(), icon: <Shield size={20} />, color: 'text-indigo-500' },
+    { label: 'Pending Apps', value: users.filter(u => u.listenerStatus === 'pending').length.toString(), icon: <Clock size={20} />, color: 'text-yellow-500' },
+    { label: 'Active Listeners', value: users.filter(u => u.role === 'listener' && u.listenerActive).length.toString(), icon: <Shield size={20} />, color: 'text-indigo-500' },
   ];
 
   return (
@@ -202,6 +229,15 @@ const AdminDashboard: React.FC = () => {
               className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${filter === 'all' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-slate-400 hover:text-white'}`}
             >
               All Users
+            </button>
+            <button 
+              onClick={() => setFilter('applications')}
+              className={`relative px-4 py-2 rounded-lg text-xs font-bold transition-all ${filter === 'applications' ? 'bg-yellow-500 text-white shadow-lg shadow-yellow-500/20' : 'text-slate-400 hover:text-white'}`}
+            >
+              Applications
+              {users.filter(u => u.listenerStatus === 'pending').length > 0 && (
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-ping" />
+              )}
             </button>
             <button 
               onClick={() => setFilter('dummy')}
@@ -246,7 +282,7 @@ const AdminDashboard: React.FC = () => {
                   <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Public Identity</th>
                   <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center">Auth Role</th>
                   <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Enrollment</th>
-                  <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Status</th>
+                  <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Listener Status</th>
                   <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">Actions</th>
                 </tr>
               </thead>
@@ -269,8 +305,8 @@ const AdminDashboard: React.FC = () => {
                     <tr key={u.uid} className="hover:bg-white/[0.01] transition-colors group/row">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400 font-bold border border-hmo-border group-hover/row:border-primary/30 transition-colors">
-                            {u.username?.[0]?.toUpperCase() || '?'}
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold border ${u.role === 'listener' ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400' : 'bg-slate-800 border-hmo-border text-slate-400'} group-hover/row:border-primary/30 transition-colors`}>
+                            {u.role === 'listener' ? <Headphones size={18} /> : (u.username?.[0]?.toUpperCase() || '?')}
                           </div>
                           <div>
                             <p className="text-sm font-bold text-white">{u.username || 'Unset Account'}</p>
@@ -279,7 +315,7 @@ const AdminDashboard: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${u.role === 'admin' ? 'bg-primary/20 text-primary border border-primary/30' : 'bg-slate-800 text-slate-500'}`}>
+                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${u.role === 'admin' ? 'bg-primary/20 text-primary border border-primary/30' : u.role === 'listener' ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'bg-slate-800 text-slate-500'}`}>
                           {u.role}
                         </span>
                       </td>
@@ -290,18 +326,54 @@ const AdminDashboard: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        {isDummy(u) ? (
+                        {u.listenerStatus === 'pending' ? (
+                          <span className="flex items-center gap-1.5 text-yellow-500 text-[10px] font-bold uppercase tracking-tighter">
+                            <Clock size={12} /> Pending Approval
+                          </span>
+                        ) : u.role === 'listener' ? (
+                          <span className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-tighter ${u.listenerActive ? 'text-green-500' : 'text-slate-600'}`}>
+                            <div className={`w-1.5 h-1.5 rounded-full ${u.listenerActive ? 'bg-green-500 animate-pulse' : 'bg-slate-600'}`} />
+                            {u.listenerActive ? 'Available' : 'Offline'}
+                          </span>
+                        ) : isDummy(u) ? (
                           <span className="flex items-center gap-1.5 text-red-500 text-[10px] font-bold uppercase tracking-tighter">
                             <AlertTriangle size={12} /> Flagged
                           </span>
                         ) : (
-                          <span className="flex items-center gap-1.5 text-green-500 text-[10px] font-bold uppercase tracking-tighter">
+                          <span className="flex items-center gap-1.5 text-slate-600 text-[10px] font-bold uppercase tracking-tighter">
                             <Check size={12} /> Healthy
                           </span>
                         )}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex justify-end gap-2">
+                          {u.listenerStatus === 'pending' && (
+                            <>
+                              <button 
+                                onClick={() => handleApprove(u.uid)}
+                                disabled={actionLoading === u.uid}
+                                className="p-2 text-green-500 hover:bg-green-500/10 rounded-lg transition-all"
+                                title="Approve Listener"
+                              >
+                                {actionLoading === u.uid ? <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" /> : <Check size={16} />}
+                              </button>
+                              <button 
+                                onClick={() => handleReject(u.uid)}
+                                disabled={actionLoading === u.uid}
+                                className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                                title="Reject Listener"
+                              >
+                                {actionLoading === u.uid ? <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" /> : <XCircle size={16} />}
+                              </button>
+                              <button 
+                                onClick={() => navigate(`/chat/${u.uid}?evaluate=true`)}
+                                className="p-2 text-primary hover:bg-primary/10 rounded-lg transition-all"
+                                title="Evaluation Chat"
+                              >
+                                <MessageSquare size={16} />
+                              </button>
+                            </>
+                          )}
                           <button 
                             onClick={() => handleDeleteUser(u.uid)}
                             disabled={actionLoading === u.uid}

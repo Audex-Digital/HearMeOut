@@ -55,7 +55,10 @@ interface User {
   bio?: string;
   memberSince: string;
   createdAt: any; 
-  role: 'user' | 'admin';
+  role: 'user' | 'listener' | 'admin';
+  listenerStatus: 'none' | 'pending' | 'approved' | 'rejected';
+  listenerActive: boolean;
+  isPremium: boolean;
   friends: string[];
   friendRequestsSent: string[];
   friendRequestsReceived: string[];
@@ -69,6 +72,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isAdmin: boolean;
+  isListener: boolean;
   loading: boolean;
   /** Logs in a user with email and password. */
   login: (email: string, pass: string) => Promise<void>;
@@ -98,6 +102,14 @@ interface AuthContextType {
   linkAccount: (email: string, pass: string, username: string) => Promise<void>;
   /** Utility to check if a username is already taken. */
   checkUsernameAvailability: (username: string) => Promise<boolean>;
+  /** Applies to become a listener. */
+  applyToBeListener: () => Promise<void>;
+  /** Approves a listener application (Admin only). */
+  approveListener: (applicantUid: string) => Promise<void>;
+  /** Rejects a listener application (Admin only). */
+  rejectListener: (applicantUid: string) => Promise<void>;
+  /** Toggles listener active status (Listener only). */
+  toggleListenerActive: (active: boolean) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -109,8 +121,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Computed helper for admin checks
+  // Computed helper for role checks
   const isAdmin = user?.role === 'admin';
+  const isListener = user?.role === 'listener';
 
   /**
    * Main Auth Observer Effect.
@@ -144,6 +157,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         memberSince: '',
         createdAt: null,
         role: 'user',
+        listenerStatus: 'none',
+        listenerActive: false,
+        isPremium: false,
         friends: [],
         friendRequestsSent: [],
         friendRequestsReceived: []
@@ -255,7 +271,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const batch = writeBatch(db);
         
-        const userData = {
+        const userData: User = {
           uid: firebaseUser.uid,
           email: email,
           username: trimmedUsername,
@@ -263,10 +279,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           memberSince: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
           createdAt: serverTimestamp(),
           role: 'user' as const,
+          listenerStatus: 'none',
+          listenerActive: false,
+          isPremium: false,
           bio: '',
           friends: [],
           friendRequestsSent: [],
-          friendRequestsReceived: []
+          friendRequestsReceived: [],
+          emailVerified: false,
+          isAnonymous: false
         };
         
         // 1. Create the user document
@@ -380,14 +401,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const myRef = doc(db, 'users', user.uid);
       const senderRef = doc(db, 'users', senderUid);
 
-      await updateDoc(myRef, {
+      const batch = writeBatch(db);
+
+      // 1. Update social relationships
+      batch.update(myRef, {
         friends: arrayUnion(senderUid),
         friendRequestsReceived: arrayRemove(senderUid)
       });
-      await updateDoc(senderRef, {
+      batch.update(senderRef, {
         friends: arrayUnion(user.uid),
         friendRequestsSent: arrayRemove(user.uid)
       });
+
+      // 2. Automatically initialize a Chat box metadata
+      const chatId = user.uid < senderUid ? `${user.uid}_${senderUid}` : `${senderUid}_${user.uid}`;
+      
+      // Fetch sender's username for the metadata (since we'll need it in ChatList later)
+      // We'll perform a separate getDoc before the batch commit to be safe,
+      // or just use deterministic naming in the chat record.
+      const senderSnap = await firestoreGetDoc(senderRef);
+      const senderData = senderSnap.data();
+
+      batch.set(doc(db, 'chats', chatId), {
+        participants: [user.uid, senderUid],
+        lastActivity: serverTimestamp(),
+        lastMessage: "You are now connected! Say hi.",
+        type: 'social',
+        [`participantNames.${user.uid}`]: user.username,
+        [`participantNames.${senderUid}`]: senderData?.username || 'New Friend'
+      }, { merge: true });
+
+      await batch.commit();
       toast.success("New connection established!");
     } catch (err) {
       console.error("Acceptance failed:", err);
@@ -484,7 +528,7 @@ const cancelFriendRequest = async (targetUid: string) => {
     try {
       const { user: firebaseUser } = await signInAnonymously(auth);
       
-      const userData = {
+      const userData: User = {
         uid: firebaseUser.uid,
         email: '',
         username: `Explorer_${firebaseUser.uid.slice(0, 5)}`,
@@ -492,10 +536,15 @@ const cancelFriendRequest = async (targetUid: string) => {
         memberSince: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
         createdAt: serverTimestamp(),
         role: 'user' as const,
+        listenerStatus: 'none',
+        listenerActive: false,
+        isPremium: false,
         bio: 'Anonymous explorer',
         friends: [],
         friendRequestsSent: [],
-        friendRequestsReceived: []
+        friendRequestsReceived: [],
+        emailVerified: false,
+        isAnonymous: true
       };
       
       await setDoc(doc(db, 'users', firebaseUser.uid), userData);
@@ -547,11 +596,106 @@ const cancelFriendRequest = async (targetUid: string) => {
     }
   };
 
+  /**
+   * Applies to become a listener.
+   */
+  const applyToBeListener = async () => {
+    if (!user || user.listenerStatus !== 'none') return;
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, { listenerStatus: 'pending' });
+
+      // Notify admins
+      await addDoc(collection(db, 'notifications'), {
+        type: 'listener_application',
+        applicantUid: user.uid,
+        applicantUsername: user.username,
+        createdAt: serverTimestamp(),
+        read: false,
+        recipientRole: 'admin'
+      });
+      
+      toast.success("Application submitted!");
+    } catch (err) {
+      console.error("Application failed:", err);
+      toast.error("Failed to submit application.");
+    }
+  };
+
+  /**
+   * Approves a listener application.
+   */
+  const approveListener = async (applicantUid: string) => {
+    if (!isAdmin) return;
+    try {
+      const userRef = doc(db, 'users', applicantUid);
+      await updateDoc(userRef, { 
+        role: 'listener',
+        listenerStatus: 'approved',
+        listenerActive: false
+      });
+
+      // Notify user
+      await addDoc(collection(db, 'notifications'), {
+        recipientId: applicantUid,
+        type: 'listener_approved',
+        createdAt: serverTimestamp(),
+        read: false
+      });
+      
+      toast.success("Listener approved!");
+    } catch (err) {
+      console.error("Approval failed:", err);
+      toast.error("Failed to approve listener.");
+    }
+  };
+
+  /**
+   * Rejects a listener application.
+   */
+  const rejectListener = async (applicantUid: string) => {
+    if (!isAdmin) return;
+    try {
+      const userRef = doc(db, 'users', applicantUid);
+      await updateDoc(userRef, { listenerStatus: 'rejected' });
+
+      // Notify user
+      await addDoc(collection(db, 'notifications'), {
+        recipientId: applicantUid,
+        type: 'listener_rejected',
+        createdAt: serverTimestamp(),
+        read: false
+      });
+      
+      toast.success("Listener rejected.");
+    } catch (err) {
+      console.error("Rejection failed:", err);
+      toast.error("Failed to reject listener.");
+    }
+  };
+
+  /**
+   * Toggles listener active status.
+   */
+  const toggleListenerActive = async (active: boolean) => {
+    if (!isListener || !user) return;
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, { listenerActive: active });
+      setUser(prev => prev ? { ...prev, listenerActive: active } : null);
+      toast.success(active ? "You are now active!" : "You are now offline.");
+    } catch (err) {
+      console.error("Toggle failed:", err);
+      toast.error("Failed to update status.");
+    }
+  };
+
   return (
     <AuthContext.Provider value={{ 
-      user, isAdmin, loading, login, signup, logout, updateProfile,
+      user, isAdmin, isListener, loading, login, signup, logout, updateProfile,
       sendFriendRequest, acceptFriendRequest, rejectFriendRequest, cancelFriendRequest, removeFriend,
-      refreshAuth, resendVerificationEmail, loginAnonymously, linkAccount, checkUsernameAvailability
+      refreshAuth, resendVerificationEmail, loginAnonymously, linkAccount, checkUsernameAvailability,
+      applyToBeListener, approveListener, rejectListener, toggleListenerActive
     }}>
       {children}
     </AuthContext.Provider>

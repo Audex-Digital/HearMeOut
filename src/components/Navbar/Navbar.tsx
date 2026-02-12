@@ -24,7 +24,9 @@ import {
   LayoutDashboard, 
   Menu, 
   X, 
-  Bell 
+  Bell,
+  MessageSquare,
+  Bookmark
 } from 'lucide-react';
 import { useAuth } from '../../auth/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -47,7 +49,7 @@ const Navbar: React.FC = () => {
    * - Queries 'notifications' where recipient matches and read is false.
    */
   React.useEffect(() => {
-    if (!user?.emailVerified || user?.isAnonymous) {
+    if (!user) {
       setUnreadCount(0);
       return;
     }
@@ -69,7 +71,7 @@ const Navbar: React.FC = () => {
     });
 
     return () => unsubscribe();
-  }, [user?.uid, user?.emailVerified, user?.isAnonymous]);
+  }, [user?.uid]);
 
   /** 
    * Clears auth session and redirects to home. 
@@ -92,76 +94,105 @@ const Navbar: React.FC = () => {
         {/* Brand Logo */}
         <Link 
           to={user ? "/feed" : "/"} 
-          className="flex items-center gap-3 transition-transform hover:scale-105" 
+          className="flex items-center gap-2 group" 
           onClick={() => setIsMenuOpen(false)}
         >
-          <div className="w-8 h-8 flex items-center justify-center bg-white/5 border border-hmo-border rounded-lg">
-            <Heart size={18} fill="currentColor" className="text-primary" />
+          <div className="w-10 h-10 flex items-center justify-center bg-primary/10 rounded-xl group-hover:bg-primary group-hover:text-white transition-all">
+            <Heart size={20} fill="currentColor" className="text-primary group-hover:text-white" />
           </div>
-          <span className="text-xl font-bold text-white tracking-tight">HearMeOut</span>
+          <span className="text-xl font-bold text-white tracking-tight hidden sm:block">HearMeOut</span>
         </Link>
 
-        {/* Desktop Navigation Links */}
-        <div className="hidden md:flex items-center gap-8">
-          {user ? (
-            <>
-              <Link to="/feed" className="text-sm font-medium text-slate-400 hover:text-white transition-colors flex items-center gap-2">
-                <LayoutDashboard size={18} />
-                Feed
+        {/* Desktop Navigation Links - Pill Styled */}
+        {user ? (
+          <div className="hidden md:flex items-center bg-hmo-card border border-hmo-border p-1.5 rounded-2xl">
+            <Link 
+              to="/feed" 
+              className={`px-6 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${window.location.pathname === '/feed' ? 'bg-primary/20 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+            >
+              <LayoutDashboard size={18} />
+              Feed
+            </Link>
+            <Link 
+              to="/create-post" 
+              className={`px-6 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${window.location.pathname === '/create-post' ? 'bg-primary/20 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+            >
+              <PlusSquare size={18} />
+              Post
+            </Link>
+            <Link 
+              to="/chats" 
+              className={`px-6 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${window.location.pathname === '/chats' ? 'bg-primary/20 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+            >
+              <MessageSquare size={18} />
+              Chats
+            </Link>
+            <Link 
+              to="/bookmarks" 
+              className={`px-6 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${window.location.pathname === '/bookmarks' ? 'bg-primary/20 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+            >
+              <Bookmark size={18} />
+              Saved
+            </Link>
+            <Link 
+              to="/profile" 
+              className={`px-6 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${window.location.pathname === '/profile' ? 'bg-primary/20 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+            >
+              <UserIcon size={18} />
+              Profile
+            </Link>
+          </div>
+        ) : (
+          <div className="hidden md:flex items-center gap-8">
+            <a href="#about" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">About</a>
+            <a href="#how-it-works" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">Safety</a>
+          </div>
+        )}
+
+        {/* Right Actions */}
+        <div className="flex items-center gap-2 sm:gap-4">
+          {!user ? (
+            <div className="hidden md:flex items-center gap-4">
+              <Link to="/login" className="text-sm font-medium text-slate-400 hover:text-white transition-colors px-4 py-2">
+                Log In
               </Link>
-              <Link to="/create-post" className="text-sm font-medium text-slate-400 hover:text-white transition-colors flex items-center gap-2">
-                <PlusSquare size={18} />
-                Post
+              <Link to="/signup" className="bg-gradient-to-br from-primary to-accent text-white px-6 py-2 rounded-full font-semibold text-sm shadow-lg shadow-primary-glow hover:translate-y-[-2px] transition-all">
+                Sign Up
               </Link>
-              <Link to="/profile" className="text-sm font-medium text-slate-400 hover:text-white transition-colors flex items-center gap-2">
-                <UserIcon size={18} />
-                Profile
-              </Link>
-              
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 sm:gap-4">
               {/* Notification Trigger */}
               <div className="relative">
                 <button 
                   onClick={() => setIsNotifPanelOpen(true)}
-                  className="p-2 text-slate-400 hover:text-white transition-all relative"
+                  className="p-2.5 bg-white/5 border border-hmo-border rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-all relative"
                 >
-                  <Bell size={18} />
+                  <Bell size={20} />
                   {unreadCount > 0 && (
-                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-primary rounded-full border-2 border-hmo-dark animate-pulse"></span>
+                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-hmo-dark animate-pulse"></span>
                   )}
                 </button>
               </div>
 
               <button 
                 onClick={handleLogout}
-                className="text-sm font-medium text-slate-400 hover:text-white transition-colors flex items-center gap-2"
+                className="p-2.5 bg-white/5 border border-hmo-border rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-all"
+                title="Logout"
               >
-                <LogOut size={18} />
-                Logout
+                <LogOut size={20} />
               </button>
-            </>
-          ) : (
-            <>
-              <a href="#about" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">About</a>
-              <a href="#how-it-works" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">Safety</a>
-              <div className="flex items-center gap-4">
-                <Link to="/login" className="text-sm font-medium text-slate-400 hover:text-white transition-colors px-4 py-2">
-                  Log In
-                </Link>
-                <Link to="/signup" className="bg-gradient-to-br from-primary to-accent text-white px-6 py-2 rounded-full font-semibold text-sm shadow-lg shadow-primary-glow hover:translate-y-[-2px] transition-all">
-                  Sign Up
-                </Link>
-              </div>
-            </>
+            </div>
           )}
-        </div>
 
-        {/* Hamburger Toggle (Mobile Only) */}
-        <button 
-          className="md:hidden p-2 text-slate-400 hover:text-white transition-colors"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-        >
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+          {/* Hamburger Toggle (Mobile Only) */}
+          <button 
+            className="md:hidden p-2.5 bg-white/5 border border-hmo-border rounded-xl text-slate-400 hover:text-white transition-colors"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Drawer Overlay */}
@@ -176,18 +207,24 @@ const Navbar: React.FC = () => {
           >
             {user ? (
               <>
-                <Link to="/feed" className="text-lg font-medium text-slate-300 flex items-center gap-3" onClick={() => setIsMenuOpen(false)}>
+                <Link to="/feed" className="text-lg font-bold text-slate-300 flex items-center gap-3" onClick={() => setIsMenuOpen(false)}>
                   <LayoutDashboard size={20} /> Feed
                 </Link>
-                <Link to="/create-post" className="text-lg font-medium text-slate-300 flex items-center gap-3" onClick={() => setIsMenuOpen(false)}>
-                  <PlusSquare size={20} /> Create Post
+                <Link to="/create-post" className="text-lg font-bold text-slate-300 flex items-center gap-3" onClick={() => setIsMenuOpen(false)}>
+                  <PlusSquare size={20} /> Post
                 </Link>
-                <Link to="/profile" className="text-lg font-medium text-slate-300 flex items-center gap-3" onClick={() => setIsMenuOpen(false)}>
+                <Link to="/chats" className="text-lg font-bold text-slate-300 flex items-center gap-3" onClick={() => setIsMenuOpen(false)}>
+                  <MessageSquare size={20} /> Chats
+                </Link>
+                <Link to="/bookmarks" className="text-lg font-bold text-slate-300 flex items-center gap-3" onClick={() => setIsMenuOpen(false)}>
+                  <Bookmark size={20} /> Bookmarks
+                </Link>
+                <Link to="/profile" className="text-lg font-bold text-slate-300 flex items-center gap-3" onClick={() => setIsMenuOpen(false)}>
                   <UserIcon size={20} /> Profile
                 </Link>
                 <button 
                   onClick={handleLogout}
-                  className="text-lg font-medium text-red-400 flex items-center gap-3 mt-4"
+                  className="text-lg font-bold text-red-500 flex items-center gap-3 mt-4"
                 >
                   <LogOut size={20} /> Logout
                 </button>

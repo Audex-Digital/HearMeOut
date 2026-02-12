@@ -30,6 +30,10 @@ import AdminDashboard from './pages/AdminDashboard';
 import Contact from './pages/Contact';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
+import Chat from './pages/Chat';
+import ChatList from './pages/ChatList';
+import Rooms from './pages/Rooms';
+import Bookmarks from './pages/Bookmarks';
 
 import NotificationSystem from './components/Notifications/NotificationSystem';
 import { Toaster } from 'react-hot-toast';
@@ -93,7 +97,17 @@ const AppContent: React.FC = () => {
   return (
     <div className="bg-hmo-dark min-h-screen text-slate-200 selection:bg-primary/30">
       {/* Global UI Overlays */}
-      <Toaster position="bottom-right" />
+      <Toaster 
+        position="bottom-right" 
+        toastOptions={{
+          duration: 5000,
+          style: {
+            background: '#1e293b',
+            color: '#fff',
+            border: '1px solid rgba(255,255,255,0.1)'
+          }
+        }} 
+      />
       <Navbar />
       <NotificationSystem />
 
@@ -120,6 +134,10 @@ const AppContent: React.FC = () => {
         
         <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
         <Route path="/create-post" element={<ProtectedRoute><CreatePost /></ProtectedRoute>} />
+        <Route path="/chat/:uid" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+        <Route path="/chats" element={<ProtectedRoute><ChatList /></ProtectedRoute>} />
+        <Route path="/bookmarks" element={<ProtectedRoute><Bookmarks /></ProtectedRoute>} />
+        <Route path="/rooms" element={<ProtectedRoute><Rooms /></ProtectedRoute>} />
         
         {/* --- Administrative Routes --- */}
         <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />

@@ -14,7 +14,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Heart, MessageCircle, Share2, MoreHorizontal, UserPlus, Check, Clock } from 'lucide-react';
+import { Heart, MessageCircle, UserPlus, Clock, ShieldAlert, MessageSquare } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../auth/AuthContext';
@@ -26,8 +26,11 @@ import {
   collection, 
   addDoc,
   runTransaction,
-  increment
+  increment,
+  setDoc,
+  deleteDoc
 } from 'firebase/firestore';
+import PostOptions from './PostOptions';
 
 /**
  * Interface representing the core post document structure.
@@ -63,8 +66,8 @@ interface PostCardProps {
 
 const PostCard: React.FC<PostCardProps> = ({ 
   post, 
-  isAdmin, 
-  onDelete, 
+  isAdmin,
+  onDelete,
   onSendFriendRequest, 
   onCancelFriendRequest,
   requesting,
@@ -72,6 +75,7 @@ const PostCard: React.FC<PostCardProps> = ({
 }) => {
   const { user } = useAuth();
   const [isLiked, setIsLiked] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const [likeLoading, setLikeLoading] = useState(false);
   const [likesCount, setLikesCount] = useState(post.likes || 0);
 
@@ -108,56 +112,55 @@ const PostCard: React.FC<PostCardProps> = ({
   }, [post.id, user?.uid, user?.emailVerified]);
 
   /**
+   * Listen for whether the current user has bookmarked this post.
+   */
+  useEffect(() => {
+    if (!user) {
+      setIsSaved(false);
+      return;
+    }
+    
+    const bookmarkRef = doc(db, 'users', user.uid, 'bookmarks', post.id);
+    const unsubscribe = onSnapshot(bookmarkRef, (docSnap) => {
+      setIsSaved(docSnap.exists());
+    }, (error) => {
+      console.error("Bookmark sync error:", error);
+    });
+
+    return () => unsubscribe();
+  }, [post.id, user?.uid]);
+
+  /**
    * Atomically toggles the 'like' status.
-   * Logic: 
-   * 1. Performs an optimistic UI update.
-   * 2. Runs a Firestore transaction to increment/decrement the count 
-   *    and create/delete the user's specific like document.
-   * 3. Sends a notification to the author if successful.
    */
   const handleToggleLike = async () => {
     if (!user || likeLoading) return;
     
-    // Support feature is reserved for verified non-guests
     if (!user.emailVerified || user.isAnonymous) {
       toast.error("Please verify your email to support others.");
       return;
     }
     
     setLikeLoading(true);
-    
     const postRef = doc(db, 'posts', post.id);
     const likeRef = doc(db, 'posts', post.id, 'likes', user.uid);
     const wasLiked = isLiked;
     
-    // --- OPTIMISTIC UPDATE ---
-    // Change UI state immediately for responsive feel
     setIsLiked(!wasLiked);
     setLikesCount(prev => wasLiked ? Math.max(0, prev - 1) : prev + 1);
 
     try {
       await runTransaction(db, async (transaction) => {
         const likeDoc = await transaction.get(likeRef);
-        const alreadyLiked = likeDoc.exists();
-
-        // Safety: Ensure server state matches our toggle direction
-        if (alreadyLiked) {
+        if (likeDoc.exists()) {
           transaction.delete(likeRef);
-          transaction.update(postRef, { 
-            likes: increment(-1) 
-          });
+          transaction.update(postRef, { likes: increment(-1) });
         } else {
-          transaction.set(likeRef, {
-            userId: user.uid,
-            createdAt: serverTimestamp()
-          });
-          transaction.update(postRef, { 
-            likes: increment(1) 
-          });
+          transaction.set(likeRef, { userId: user.uid, createdAt: serverTimestamp() });
+          transaction.update(postRef, { likes: increment(1) });
         }
       });
 
-      // Notify owner if someone else supports their post
       if (!wasLiked && user.uid !== post.authorId) {
         addDoc(collection(db, 'notifications'), {
           recipientId: post.authorId,
@@ -173,11 +176,39 @@ const PostCard: React.FC<PostCardProps> = ({
     } catch (error) {
       console.error("Support update failed:", error);
       toast.error("Failed to sync support.");
-      // Rollback optimistic state if the network dies
       setIsLiked(wasLiked);
       setLikesCount(prev => wasLiked ? prev + 1 : Math.max(0, prev - 1));
     } finally {
       setLikeLoading(false);
+    }
+  };
+
+  /**
+   * Atomically toggles the 'save/bookmark' status.
+   */
+  const handleToggleSave = async () => {
+    if (!user) return;
+    
+    if (!user.emailVerified || user.isAnonymous) {
+      toast.error("Please verify your email to save posts.");
+      return;
+    }
+
+    const bookmarkRef = doc(db, 'users', user.uid, 'bookmarks', post.id);
+    try {
+      if (isSaved) {
+        await deleteDoc(bookmarkRef);
+        toast.success("Removed from bookmarks");
+      } else {
+        await setDoc(bookmarkRef, {
+          postId: post.id,
+          savedAt: serverTimestamp()
+        });
+        toast.success("Post saved to bookmarks!", { icon: '🔖' });
+      }
+    } catch (err) {
+      console.error("Save toggle failed:", err);
+      toast.error("Failed to update bookmark.");
     }
   };
 
@@ -193,112 +224,94 @@ const PostCard: React.FC<PostCardProps> = ({
     return `${Math.floor(seconds / 86400)}d ago`;
   };
 
-  // Helper variables for friend request UI
   const isFriend = user?.friends?.includes(post.authorId);
   const requestSent = user?.friendRequestsSent?.includes(post.authorId);
   const isSelf = user?.uid === post.authorId;
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-hmo-card border border-hmo-border rounded-2xl p-5 sm:p-6 shadow-sm hover:border-slate-700 transition-all group"
+      className="bg-hmo-card border border-hmo-border rounded-3xl p-6 sm:p-8 mb-6 hover:border-slate-700 transition-all group shadow-sm"
     >
-      <div className="flex justify-between items-start mb-4">
-        <Link to={`/profile/@${post.username}`} className="flex items-center gap-3 group/author">
-          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs group-hover/author:scale-110 transition-transform">
-            {post.username?.[0] || 'A'}
+      <div className="flex justify-between items-start mb-6">
+        <Link to={`/profile/@${post.username}`} className="flex items-center gap-4 group/author">
+          <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-500/20 flex items-center justify-center text-indigo-400 font-black text-sm group-hover/author:scale-105 transition-transform shadow-inner">
+            {post.username?.slice(0, 2).toUpperCase() || 'AN'}
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-white group-hover/author:underline">{post.username || 'Anonymous'}</h3>
-            <p className="text-[10px] text-slate-500 uppercase tracking-wider">{getRelativeTime(post.createdAt)}</p>
+            <div className="flex items-center gap-2">
+              <h3 className="text-base font-bold text-white group-hover/author:text-primary transition-colors">{post.username || 'Anonymous'}</h3>
+              {isAdmin && (
+                <ShieldAlert size={14} className="text-primary" aria-label="Administrator" />
+              )}
+            </div>
+            <div className="flex items-center gap-2 mt-0.5">
+               <Clock size={12} className="text-slate-600" />
+               <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">{getRelativeTime(post.createdAt)}</p>
+            </div>
           </div>
         </Link>
         
         <div className="flex items-center gap-2">
-           {/* Friend Request Logic */}
-           {!isSelf && !isFriend && (
-            requestSent ? (
-              <div className="relative group/tooltip">
-                <button 
-                  onClick={() => onCancelFriendRequest?.(post.authorId)}
-                  disabled={requesting}
-                  className="p-2 text-primary bg-primary/10 rounded-lg flex items-center justify-center transition-all hover:bg-red-500/10 hover:text-red-500"
-                  title="Cancel Request"
-                >
-                  <Clock size={18} className="animate-pulse-slow" />
-                </button>
-                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-800 text-white text-[10px] font-bold rounded opacity-0 group-hover/tooltip:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-hmo-border">
-                  Friend request sent
-                </span>
-              </div>
-            ) : (
-              <button 
-                onClick={() => onSendFriendRequest?.(post.authorId)}
-                disabled={requesting}
-                className="p-2 text-slate-500 hover:text-primary hover:bg-primary/10 rounded-lg transition-all"
-                title="Add Friend"
-              >
-                <UserPlus size={18} />
-              </button>
-            )
-           )}
-           {isFriend && (
-             <span className="p-2 text-green-500 bg-green-500/10 rounded-lg flex items-center gap-1.5 text-[10px] font-bold uppercase">
-               <Check size={14} /> Friend
-             </span>
-           )}
-           {/* Admin Controls */}
-           {isAdmin && onDelete && (
-             <button 
-               onClick={() => onDelete(post.id)}
-               className="p-2 text-slate-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
-               title="Delete Post"
-             >
-               <MoreHorizontal size={18} />
-             </button>
-           )}
+            <PostOptions 
+              postId={post.id}
+              postAuthorId={post.authorId}
+              userId={user?.uid || ''}
+              userRole={user?.role === 'admin' ? 'admin' : 'user'}
+              isSaved={isSaved}
+              onDelete={(id) => onDelete?.(id)}
+              onSave={handleToggleSave}
+              onReport={() => toast.success("Thank you. Our moderators will review this post.", { icon: '🛡️' })}
+            />
         </div>
       </div>
       
-      <p className="text-slate-300 leading-relaxed mb-6 text-sm">
+      <p className="text-slate-300 leading-relaxed mb-8 text-[15px] font-medium">
         {post.content}
       </p>
 
       {/* Action Bar */}
-      <div className="flex items-center gap-6 pt-4 border-t border-hmo-border">
-        {/* Support Button (Like) */}
+      <div className="flex items-center gap-8 pt-6 border-t border-hmo-border/50">
         <button 
           onClick={handleToggleLike}
           disabled={likeLoading}
-          className={`flex items-center gap-2 transition-colors text-xs font-medium ${isLiked ? 'text-pink-500' : 'text-slate-400 hover:text-primary'}`}
+          className={`flex items-center gap-2.5 transition-all text-sm font-bold active:scale-95 ${isLiked ? 'text-primary' : 'text-slate-500 hover:text-white'}`}
         >
-          <Heart size={16} fill={isLiked ? "currentColor" : "none"} />
-          {isLiked ? 'Supported' : 'Support'}
-          {likesCount > 0 ? (
-             <span className="bg-white/5 px-1.5 py-0.5 rounded text-[10px] font-bold">
-               {likesCount}
-             </span>
-          ) : null}
+          <Heart size={18} fill={isLiked ? "currentColor" : "none"} className={isLiked ? "animate-heartbeat" : ""} />
+          <span className="hidden sm:inline">Support</span>
+          {likesCount > 0 && <span className="text-[10px] bg-white/5 px-2 py-0.5 rounded-full">{likesCount}</span>}
         </button>
 
-        {/* Reply Button (Comments) */}
         <button 
           onClick={() => onOpenComments(post)}
-          className="flex items-center gap-2 text-slate-400 hover:text-accent transition-colors text-xs font-medium relative"
+          className="flex items-center gap-2.5 text-slate-500 hover:text-white transition-all text-sm font-bold active:scale-95"
         >
-          <MessageCircle size={16} />
-          Reply
-          {post.commentCount && post.commentCount > 0 ? (
-            <span className="absolute -top-1.5 -right-2 min-w-[14px] h-[14px] px-1 bg-accent text-white text-[8px] font-bold rounded-full flex items-center justify-center">
-              {post.commentCount}
-            </span>
-          ) : null}
+          <MessageCircle size={18} />
+          <span className="hidden sm:inline">Reply</span>
+          {post.commentCount && post.commentCount > 0 && <span className="text-[10px] bg-white/5 px-2 py-0.5 rounded-full">{post.commentCount}</span>}
         </button>
 
-        <button className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-xs font-medium ml-auto">
-          <Share2 size={16} />
-        </button>
+        {!isSelf && !isFriend && (
+          <button 
+            onClick={() => requestSent ? onCancelFriendRequest?.(post.authorId) : onSendFriendRequest?.(post.authorId)}
+            disabled={requesting}
+            className={`ml-auto flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${requestSent ? 'bg-primary/10 text-primary' : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white'}`}
+          >
+            {requestSent ? <Clock size={14} /> : <UserPlus size={14} />}
+            {requestSent ? 'Pending' : 'Add Friend'}
+          </button>
+        )}
+
+        {isFriend && (
+          <Link 
+            to={`/chat/${post.authorId}`}
+            className="ml-auto flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/20 text-primary rounded-xl text-xs font-bold hover:bg-primary/20 transition-all active:scale-95 shadow-sm shadow-primary/5"
+          >
+            <MessageSquare size={14} />
+            Chat
+          </Link>
+        )}
       </div>
     </motion.div>
   );
