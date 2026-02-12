@@ -1,15 +1,7 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { 
-  PlusCircle, 
-  MessageCircle, 
-  Heart, 
-  Users, 
-  LifeBuoy,
-  ShieldCheck,
-  HandshakeIcon
-} from 'lucide-react';
-import { useNavigate, Link } from 'react-router-dom';
+  LifeBuoy} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { db } from '../../firebase/config';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import toast from 'react-hot-toast';

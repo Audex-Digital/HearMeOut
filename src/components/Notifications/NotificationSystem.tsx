@@ -17,9 +17,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, X, Bell, Heart, MessageCircle, Headphones, ShieldCheck, UserPlus } from 'lucide-react';
+import { Check, X, Heart, MessageCircle, Headphones, ShieldCheck, UserPlus } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import toast from 'react-hot-toast';
 import { useAuth } from '../../auth/AuthContext';
 import { db } from '../../firebase/config';
 import { 

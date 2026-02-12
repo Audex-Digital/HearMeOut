@@ -22,7 +22,6 @@ import CommentModal from '../components/Feed/CommentModal';
 import { ShieldAlert } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { alertService } from '../utils/sweetalert';
-import Footer from '../components/Footer/Footer';
 
 
 import LoggedLayout from '../components/Layout/LoggedLayout';
