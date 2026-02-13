@@ -18,7 +18,7 @@ const Contact: React.FC = () => {
       return toast.error("Please fill in all fields.");
     }
 
-    const phoneNumber = "23470770067788";
+    const phoneNumber = "https://wa.me/2347070067788";
     const text = `*New Contact Inquiry (HearMeOut)*\n\n*Name:* ${formData.name}\n*Email:* ${formData.email}\n*Message:* ${formData.message}`;
     
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(text)}`;
