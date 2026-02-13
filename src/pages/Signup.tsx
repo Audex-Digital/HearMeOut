@@ -54,13 +54,12 @@ const Signup: React.FC = () => {
     try {
       await signup(email, password, username);
       toast.success("Account created! Check your email to verify.");
-      navigate('/profile');
+      navigate('/verify');
     } catch (err: any) {
       if (err.code === 'firestore/creation-failed') {
         // Edge Case: Auth worked but Firestore profile setup failed.
-        // The user is logged in but has no profile document. 
-        // Redirect to profile where the UI handles this recovery.
-        navigate('/profile');
+        // Redirect to verify flow.
+        navigate('/verify');
       }
       // General errors (auth/email-already-in-use, etc) are toasted by AuthContext.
     } finally {

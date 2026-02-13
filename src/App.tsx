@@ -34,6 +34,7 @@ import Chat from './pages/Chat';
 import ChatList from './pages/ChatList';
 import Rooms from './pages/Rooms';
 import Bookmarks from './pages/Bookmarks';
+import Verify from './pages/Verify';
 
 import NotificationSystem from './components/Notifications/NotificationSystem';
 import { Toaster } from 'react-hot-toast';
@@ -116,6 +117,7 @@ const AppContent: React.FC = () => {
         <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
         <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
+        <Route path="/verify" element={<Verify />} />
         
         {/* --- Public Informational Routes --- */}
         <Route path="/contact" element={<Contact />} />
