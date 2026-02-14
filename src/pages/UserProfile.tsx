@@ -55,10 +55,19 @@ interface TargetUserData {
 
 const UserProfile: React.FC = () => {
   const { username } = useParams<{ username: string }>();
-  const { user: currentUser, sendFriendRequest, removeFriend, cancelFriendRequest } = useAuth();
+  const { 
+    user: currentUser, 
+    friends,
+    incomingRequests,
+    outgoingRequests,
+    sendFriendRequest, 
+    removeFriend, 
+    cancelFriendRequest 
+  } = useAuth();
   const navigate = useNavigate();
 
   const [targetUser, setTargetUser] = useState<TargetUserData | null>(null);
+  const [friendCount, setFriendCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [socialLoading, setSocialLoading] = useState(false);
 
@@ -84,7 +93,17 @@ const UserProfile: React.FC = () => {
         
         if (!snapshot.empty) {
           const userDoc = snapshot.docs[0];
-          setTargetUser({ uid: userDoc.id, ...userDoc.data() } as TargetUserData);
+          const uid = userDoc.id;
+          setTargetUser({ uid, ...userDoc.data() } as TargetUserData);
+
+          // Fetch friend count from friend_requests collection
+          const fq = query(
+            collection(db, 'friend_requests'),
+            where('participants', 'array-contains', uid),
+            where('status', '==', 'accepted')
+          );
+          const fSnap = await getDocs(fq);
+          setFriendCount(fSnap.size);
         } else {
           setTargetUser(null);
         }
@@ -103,9 +122,14 @@ const UserProfile: React.FC = () => {
   const getSocialState = () => {
     if (!currentUser || !targetUser) return 'none';
     if (currentUser.uid === targetUser.uid) return 'self';
-    if (currentUser.friends?.includes(targetUser.uid)) return 'friends';
-    if (currentUser.friendRequestsSent?.includes(targetUser.uid)) return 'request_sent';
-    if (currentUser.friendRequestsReceived?.includes(targetUser.uid)) return 'request_received';
+    
+    // Check mutual friends (Source of Truth: AuthContext friends state)
+    if (friends.includes(targetUser.uid)) return 'friends';
+    
+    // Check pending requests
+    if (outgoingRequests.some(req => req.to === targetUser.uid)) return 'request_sent';
+    if (incomingRequests.some(req => req.from === targetUser.uid)) return 'request_received';
+    
     return 'none';
   };
 
@@ -315,7 +339,7 @@ const UserProfile: React.FC = () => {
             {/* Statistics Bar */}
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 bg-white/5 border border-hmo-border rounded-2xl text-center">
-                <p className="text-xl font-bold text-white mb-0.5">{targetUser.friends?.length || 0}</p>
+                <p className="text-xl font-bold text-white mb-0.5">{friendCount}</p>
                 <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">Safe Connections</p>
               </div>
               <div className="p-4 bg-white/5 border border-hmo-border rounded-2xl text-center">

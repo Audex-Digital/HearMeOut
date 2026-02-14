@@ -224,8 +224,9 @@ const PostCard: React.FC<PostCardProps> = ({
     return `${Math.floor(seconds / 86400)}d ago`;
   };
 
-  const isFriend = user?.friends?.includes(post.authorId);
-  const requestSent = user?.friendRequestsSent?.includes(post.authorId);
+  const { friends, outgoingRequests } = useAuth();
+  const isFriend = friends.includes(post.authorId);
+  const requestSent = outgoingRequests.some(req => req.to === post.authorId);
   const isSelf = user?.uid === post.authorId;
 
   return (

@@ -47,6 +47,7 @@ interface UserProfile {
 const Profile: React.FC = () => {
   const { 
     user, 
+    incomingRequests,
     loading, 
     acceptFriendRequest, 
     rejectFriendRequest,
@@ -57,27 +58,32 @@ const Profile: React.FC = () => {
   
   // State for serialized user lists
   const [requestSenders, setRequestSenders] = useState<UserProfile[]>([]);
-  // const [friendsList, setFriendsList] = useState<UserProfile[]>([]);
   const [loadingRequests, setLoadingRequests] = useState(false);
   const [showRequests, setShowRequests] = useState(false);
 
   /**
    * Data Fetching Effect.
+   * Syncs the requestSenders state whenever incomingRequests changes.
    */
   useEffect(() => {
     const fetchSenders = async () => {
-      if (!user?.friendRequestsReceived?.length) {
+      if (!incomingRequests?.length) {
         setRequestSenders([]);
         return;
       }
       
       setLoadingRequests(true);
       const senders: UserProfile[] = [];
-      for (const uid of user.friendRequestsReceived) {
+      for (const req of incomingRequests) {
         try {
-          const docSnap = await getDoc(doc(db, 'users', uid));
-          if (docSnap.exists()) {
-            senders.push({ uid, username: docSnap.data().username });
+          // Check if we have the username in the request doc first (cache)
+          if (req.fromUsername) {
+            senders.push({ uid: req.from, username: req.fromUsername });
+          } else {
+            const docSnap = await getDoc(doc(db, 'users', req.from));
+            if (docSnap.exists()) {
+              senders.push({ uid: req.from, username: docSnap.data().username });
+            }
           }
         } catch (error) {
           console.error("Error fetching request sender profile:", error);
@@ -87,10 +93,8 @@ const Profile: React.FC = () => {
       setLoadingRequests(false);
     };
 
-    if (user) {
-      fetchSenders();
-    }
-  }, [user?.friendRequestsReceived]);
+    fetchSenders();
+  }, [incomingRequests]);
 
   if (loading) {
     return (
@@ -216,9 +220,9 @@ const Profile: React.FC = () => {
               >
                 <Users size={18} />
                 Friend Requests
-                {user.friendRequestsReceived?.length > 0 && (
+                {incomingRequests.length > 0 && (
                   <span className="bg-white text-primary text-[10px] px-1.5 py-0.5 rounded-full font-black ml-1">
-                    {user.friendRequestsReceived.length}
+                    {incomingRequests.length}
                   </span>
                 )}
               </button>

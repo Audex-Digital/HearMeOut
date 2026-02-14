@@ -81,24 +81,42 @@ service cloud.firestore {
       // Users can see other users.
       allow read: if isAuth();
       
-      // Update User Logic.
+      /**
+       * User Update Rules:
+       * 1. Admins: Full access.
+       * 2. Owners: Can edit their profile but cannot change system fields (role, premium, uid, createdAt).
+       * 3. Social Actions: Users can modify the 'friends' array 
+       *    on OTHER users' documents, but ONLY to add/remove their OWN UID.
+       */
       allow update: if isAuth() && (
         isAdmin() ||
         (isOwner(userId) && 
           request.resource.data.role == resource.data.role &&
-          (
-            (resource.data.role == 'listener' && request.resource.data.diff(resource.data).affectedKeys().hasAny(['listenerActive'])) ||
-            (request.resource.data.listenerActive == resource.data.listenerActive)
-          ) &&
+          request.resource.data.isPremium == resource.data.isPremium &&
+          request.resource.data.createdAt == resource.data.createdAt &&
+          request.resource.data.uid == resource.data.uid &&
           (
             (resource.data.listenerStatus == 'none' && request.resource.data.listenerStatus == 'pending') ||
             (request.resource.data.listenerStatus == resource.data.listenerStatus)
+          ) &&
+          (
+            (resource.data.role == 'listener' && request.resource.data.diff(resource.data).affectedKeys().hasAny(['listenerActive'])) ||
+            (request.resource.data.listenerActive == resource.data.listenerActive)
+          )
+        ) ||
+        (
+          !isOwner(userId) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['friends']) &&
+          (
+            (request.resource.data.friends.hasAll(resource.data.friends) && 
+             request.resource.data.friends.removeAll(resource.data.friends).hasOnly([request.auth.uid])) ||
+            (resource.data.friends.hasAll(request.resource.data.friends) && 
+             resource.data.friends.removeAll(request.resource.data.friends).hasOnly([request.auth.uid]))
           )
         )
       );
 
       // --- Bookmarks Subcollection ---
-      // Users can only manage their own bookmarks.
       match /bookmarks/{postId} {
         allow read, write: if isAuth() && isOwner(userId);
       }
@@ -151,7 +169,21 @@ service cloud.firestore {
     // FRIEND REQUESTS COLLECTION
     // -------------------------------------------------------------------------
     match /friend_requests/{docId} {
-      allow read, write: if isAuth();
+      // Users can see requests they sent or received, OR any accepted friendship (for public statistics)
+      allow read: if isAuth() && (
+        resource.data.from == request.auth.uid || 
+        resource.data.to == request.auth.uid ||
+        resource.data.status == 'accepted'
+      );
+      
+      // Creating a request: must be from the sender
+      allow create: if isAuth() && request.resource.data.from == request.auth.uid;
+      
+      // Deleting a request: sender can cancel, recipient can decline/accept
+      allow delete: if isAuth() && (resource.data.from == request.auth.uid || resource.data.to == request.auth.uid);
+      
+      // Updating a request: participants can accept
+      allow update: if isAuth() && request.auth.uid in resource.data.participants;
     }
   }
 }

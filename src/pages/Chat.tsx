@@ -51,7 +51,7 @@ const Chat: React.FC = () => {
   const isEvaluation = searchParams.get('evaluate') === 'true';
   const isHelpSession = searchParams.get('session') === 'help';
   
-  const { user } = useAuth();
+  const { user, friends } = useAuth();
   const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -223,7 +223,7 @@ const Chat: React.FC = () => {
   /** 
    * SOCIAL GUARD & NOTIFICATION SUPPRESSION
    */
-  const isFriend = user.friends?.includes(uid);
+  const isFriend = friends.includes(uid);
   // Special sessions (Help/Eval) might have different social rules, but as requested, 
   // we ensure the logic is available for both.
   const canChat = isEvaluation || isHelpSession || isFriend;

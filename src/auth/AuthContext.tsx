@@ -29,12 +29,14 @@ import {
   setDoc, 
   updateDoc, 
   serverTimestamp, 
-  arrayUnion, 
-  arrayRemove, 
   onSnapshot, 
   addDoc, 
   collection, 
-  writeBatch
+  writeBatch,
+  query,
+  where,
+  deleteDoc,
+  getDocs
 } from 'firebase/firestore';
 import { auth, db } from '../firebase/config';
 import toast from 'react-hot-toast';
@@ -59,11 +61,22 @@ interface User {
   listenerStatus: 'none' | 'pending' | 'approved' | 'rejected';
   listenerActive: boolean;
   isPremium: boolean;
-  friends: string[];
-  friendRequestsSent: string[];
-  friendRequestsReceived: string[];
+  friends: string[]; // Deprecated: Moving to friend_requests (source of truth)
+  friendRequestsSent: string[]; // Deprecated
+  friendRequestsReceived: string[]; // Deprecated
   emailVerified: boolean;
   isAnonymous: boolean;
+}
+
+/** Represents a pending friend connection between two users. */
+interface FriendRequest {
+  id: string; // Deterministic: {fromUid}_{toUid}
+  from: string;
+  to: string;
+  participants: string[]; // [fromUid, toUid] for easier querying
+  status: 'pending' | 'accepted';
+  createdAt: any;
+  fromUsername?: string; // Optional: cache for UI
 }
 
 /**
@@ -71,6 +84,9 @@ interface User {
  */
 interface AuthContextType {
   user: User | null;
+  friends: string[]; // Array of friend UIDs
+  incomingRequests: FriendRequest[];
+  outgoingRequests: FriendRequest[];
   isAdmin: boolean;
   isListener: boolean;
   loading: boolean;
@@ -119,6 +135,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
  */
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [friends, setFriends] = useState<string[]>([]);
+  const [incomingRequests, setIncomingRequests] = useState<FriendRequest[]>([]);
+  const [outgoingRequests, setOutgoingRequests] = useState<FriendRequest[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Computed helper for role checks
@@ -131,22 +150,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
    */
   useEffect(() => {
     let unsubscribeDoc: (() => void) | null = null;
+    let unsubscribeIncoming: (() => void) | null = null;
+    let unsubscribeOutgoing: (() => void) | null = null;
+    let unsubscribeFriends: (() => void) | null = null;
 
     const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
-      // Step 1: Cleanup previous listener
-      if (unsubscribeDoc) {
-        unsubscribeDoc();
-        unsubscribeDoc = null;
-      }
+      // Step 1: Cleanup previous listeners
+      [unsubscribeDoc, unsubscribeIncoming, unsubscribeOutgoing, unsubscribeFriends].forEach(unsub => unsub?.());
+      unsubscribeDoc = null;
+      unsubscribeIncoming = null;
+      unsubscribeOutgoing = null;
+      unsubscribeFriends = null;
 
       // Step 2: Handle logged out
       if (!firebaseUser) {
+        console.log("[AuthContext] No user found, clearing state.");
         setUser(null);
+        setFriends([]);
+        setIncomingRequests([]);
+        setOutgoingRequests([]);
         setLoading(false);
         return;
       }
 
-      // Step 3: Local basic state
+      console.log(`[AuthContext] User detected: ${firebaseUser.uid}`);
+
+      // Basic User mapping for early UI display
       const basicUser: User = {
         uid: firebaseUser.uid,
         email: firebaseUser.email || '',
@@ -154,7 +183,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         usernameLowercase: (firebaseUser.displayName || 'Guest').toLowerCase(),
         emailVerified: firebaseUser.emailVerified,
         isAnonymous: firebaseUser.isAnonymous,
-        memberSince: '',
+        memberSince: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
         createdAt: null,
         role: 'user',
         listenerStatus: 'none',
@@ -165,40 +194,61 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         friendRequestsReceived: []
       };
 
-      // Step 4: Sync Profile
-      if (firebaseUser.emailVerified || firebaseUser.isAnonymous) {
-        try {
-          unsubscribeDoc = onSnapshot(doc(db, 'users', firebaseUser.uid), (snapshot) => {
-            if (snapshot.exists()) {
-              const data = snapshot.data() as User;
-              
-              // Lazy Migration
-              if (data.username && !data.usernameLowercase) {
-                updateDoc(doc(db, 'users', firebaseUser.uid), {
-                  usernameLowercase: data.username.toLowerCase()
-                }).catch(err => console.error("Lazy migration failed:", err));
-              }
+      try {
+        const userRef = doc(db, 'users', firebaseUser.uid);
+        
+        // Ensure Profile exists
+        const snap = await firestoreGetDoc(userRef);
+        if (!snap.exists()) {
+          console.warn(`[AuthContext] Profile missing for ${firebaseUser.uid}. Creating recovery document...`);
+          await setDoc(userRef, { ...basicUser, createdAt: serverTimestamp(), bio: '' });
+        }
 
-              setUser({ 
-                ...data, 
-                emailVerified: firebaseUser.emailVerified, 
-                isAnonymous: firebaseUser.isAnonymous 
-              });
-            } else {
-              setUser(basicUser);
-            }
-            setLoading(false);
-          }, (error) => {
-            console.error("User doc sync error:", error);
+        // --- Profile Sync ---
+        unsubscribeDoc = onSnapshot(userRef, (snapshot) => {
+          if (snapshot.exists()) {
+            const data = snapshot.data() as User;
+            setUser({ ...data, emailVerified: firebaseUser.emailVerified, isAnonymous: firebaseUser.isAnonymous });
+          } else {
             setUser(basicUser);
-            setLoading(false);
-          });
-        } catch (error) {
-          console.error("Listener setup failed:", error);
+          }
+          setLoading(false);
+        }, (error) => {
+          console.error("[AuthContext] User doc sync error:", error);
           setUser(basicUser);
           setLoading(false);
-        }
-      } else {
+        });
+
+        // --- Accepted Friends Sync ---
+        const friendsQuery = query(
+          collection(db, 'friend_requests'),
+          where('participants', 'array-contains', firebaseUser.uid),
+          where('status', '==', 'accepted')
+        );
+        unsubscribeFriends = onSnapshot(friendsQuery, (snap) => {
+          const friendUids = snap.docs.map(d => {
+            const data = d.data();
+            return data.from === firebaseUser.uid ? data.to : data.from;
+          });
+          setFriends(friendUids);
+        });
+
+        // --- Incoming Friend Requests Sync ---
+        const incomingQuery = query(collection(db, 'friend_requests'), where('to', '==', firebaseUser.uid), where('status', '==', 'pending'));
+        unsubscribeIncoming = onSnapshot(incomingQuery, (snap) => {
+          const reqs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as FriendRequest));
+          setIncomingRequests(reqs);
+        });
+
+        // --- Outgoing Friend Requests Sync ---
+        const outgoingQuery = query(collection(db, 'friend_requests'), where('from', '==', firebaseUser.uid), where('status', '==', 'pending'));
+        unsubscribeOutgoing = onSnapshot(outgoingQuery, (snap) => {
+          const reqs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as FriendRequest));
+          setOutgoingRequests(reqs);
+        });
+
+      } catch (error) {
+        console.error("[AuthContext] Profile initialization failed:", error);
         setUser(basicUser);
         setLoading(false);
       }
@@ -206,7 +256,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     return () => {
       unsubscribeAuth();
-      if (unsubscribeDoc) unsubscribeDoc();
+      [unsubscribeDoc, unsubscribeIncoming, unsubscribeOutgoing, unsubscribeFriends].forEach(unsub => unsub?.());
     };
   }, []);
 
@@ -252,9 +302,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const trimmedUsername = username.trim();
     const lowerUsername = trimmedUsername.toLowerCase();
     
+    console.log(`[Signup] Attempting signup for ${email} with username ${trimmedUsername}`);
+
     // Step 1: Pre-emptive uniqueness check
     const isAvailable = await checkUsernameAvailability(trimmedUsername);
     if (!isAvailable) {
+      console.warn(`[Signup] Username ${trimmedUsername} is already taken.`);
       throw new Error("This username is already taken. Please choose another.");
     }
 
@@ -262,8 +315,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
       firebaseUser = userCredential.user;
+      console.log(`[Signup] Auth account created: ${firebaseUser.uid}`);
     } catch (error: any) {
-      console.error("Auth creation failed:", error);
+      console.error("[Signup] Auth creation failed:", error);
       throw error;
     }
 
@@ -290,6 +344,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           isAnonymous: false
         };
         
+        console.log("[Signup] Initializing Firestore documents...");
         // 1. Create the user document
         batch.set(doc(db, 'users', firebaseUser.uid), userData);
         
@@ -300,9 +355,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
 
         await batch.commit();
+        console.log("[Signup] Firestore data initialized successfully.");
         
         // Fire off verification email immediately
         await sendEmailVerification(firebaseUser);
+        console.log("[Signup] Verification email sent.");
         
         // Initial state update
         setUser({
@@ -312,19 +369,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           isAnonymous: firebaseUser.isAnonymous
         });
       } catch (error: any) {
-        console.error("Firestore initialization failed:", error);
+        console.error("[Signup] Firestore initialization failed:", error);
         
         // ROLLBACK: If Firestore fails, we MUST delete the newly created Auth user
         // to allow them to retry with the same email.
         if (firebaseUser) {
           try {
+            console.log("[Signup] Rolling back Auth account...");
             await deleteUser(firebaseUser);
+            console.log("[Signup] Auth rollback successful.");
           } catch (deleteError) {
-            console.error("Cleanup rollback failed:", deleteError);
+            console.error("[Signup] Cleanup rollback failed:", deleteError);
           }
         }
 
-        const firestoreError = new Error("Account creation failed during setup. Please try again.");
+        const firestoreError = new Error("Account creation failed during setup. Please check your connection or try a different username.");
         (firestoreError as any).code = 'firestore/creation-failed';
         throw firestoreError;
       }
@@ -363,20 +422,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   /**
    * Initiates a friend request.
-   * Logic: Adds target UID to sender's outgoing list and sender UID to target's incoming list.
-   * Triggers a 'friend_request' notification for the recipient.
+   * Logic: 
+   * 1. Creates a document in /friend_requests/{myUid}_{targetUid}
+   * 2. Triggers a 'friend_request' notification for the recipient.
+   * 
+   * Uses an atomic batch write to ensure consistency.
    */
   const sendFriendRequest = async (targetUid: string) => {
     if (!user || user.uid === targetUid) return;
+    
+    console.log(`[Social] Sending friend request to ${targetUid}`);
+    const requestId = `${user.uid}_${targetUid}`;
+    
     try {
-      const myRef = doc(db, 'users', user.uid);
-      const targetRef = doc(db, 'users', targetUid);
+      const batch = writeBatch(db);
+      const requestRef = doc(db, 'friend_requests', requestId);
+      const notifRef = doc(collection(db, 'notifications'));
 
-      await updateDoc(myRef, { friendRequestsSent: arrayUnion(targetUid) });
-      await updateDoc(targetRef, { friendRequestsReceived: arrayUnion(user.uid) });
+      // 1. Create Friend Request Document
+      batch.set(requestRef, {
+        from: user.uid,
+        to: targetUid,
+        participants: [user.uid, targetUid],
+        status: 'pending',
+        fromUsername: user.username,
+        createdAt: serverTimestamp()
+      });
 
-      // Add to notifications collection for real-time toaster/panel feedback
-      await addDoc(collection(db, 'notifications'), {
+      // 2. Create Notification
+      batch.set(notifRef, {
         recipientId: targetUid,
         fromUserId: user.uid,
         fromUsername: user.username,
@@ -384,45 +458,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         createdAt: serverTimestamp(),
         read: false
       });
+
+      await batch.commit();
+      console.log("[Social] Friend request document created.");
       toast.success("Connection request sent!");
-    } catch (err) {
-      console.error("Send friend request failed:", err);
-      toast.error("Operation failed. Try again.");
+    } catch (err: any) {
+      console.error("[Social] Send friend request failed:", err);
+      toast.error(err.message || "Operation failed. Try again.");
+      throw err;
     }
   };
 
   /** 
    * Confirms a mutual friendship. 
-   * Logic: Moves UIDs from 'pending' arrays to 'friends' arrays on both documents.
+   * Logic: 
+   * 1. Updates 'friends' arrays on both documents (using per-user update logic allowed by rules).
+   * 2. Deletes the request from 'friend_requests'.
+   * 3. Initializes a Chat record.
    */
   const acceptFriendRequest = async (senderUid: string) => {
     if (!user) return;
+    const requestId = `${senderUid}_${user.uid}`;
+    
     try {
-      const myRef = doc(db, 'users', user.uid);
-      const senderRef = doc(db, 'users', senderUid);
-
-      const batch = writeBatch(db);
-
-      // 1. Update social relationships
-      batch.update(myRef, {
-        friends: arrayUnion(senderUid),
-        friendRequestsReceived: arrayRemove(senderUid)
-      });
-      batch.update(senderRef, {
-        friends: arrayUnion(user.uid),
-        friendRequestsSent: arrayRemove(user.uid)
-      });
-
-      // 2. Automatically initialize a Chat box metadata
-      const chatId = user.uid < senderUid ? `${user.uid}_${senderUid}` : `${senderUid}_${user.uid}`;
+      const requestRef = doc(db, 'friend_requests', requestId);
       
-      // Fetch sender's username for the metadata (since we'll need it in ChatList later)
-      // We'll perform a separate getDoc before the batch commit to be safe,
-      // or just use deterministic naming in the chat record.
-      const senderSnap = await firestoreGetDoc(senderRef);
+      // Update the request status to 'accepted'
+      // Rules allow: participants can update status
+      await updateDoc(requestRef, { status: 'accepted' });
+
+      // Create chat metadata
+      const chatId = user.uid < senderUid ? `${user.uid}_${senderUid}` : `${senderUid}_${user.uid}`;
+      const senderSnap = await firestoreGetDoc(doc(db, 'users', senderUid));
       const senderData = senderSnap.data();
 
-      batch.set(doc(db, 'chats', chatId), {
+      await setDoc(doc(db, 'chats', chatId), {
         participants: [user.uid, senderUid],
         lastActivity: serverTimestamp(),
         lastMessage: "You are now connected! Say hi.",
@@ -431,7 +501,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         [`participantNames.${senderUid}`]: senderData?.username || 'New Friend'
       }, { merge: true });
 
-      await batch.commit();
       toast.success("New connection established!");
     } catch (err) {
       console.error("Acceptance failed:", err);
@@ -442,12 +511,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   /** Declines an incoming request. */
   const rejectFriendRequest = async (senderUid: string) => {
     if (!user) return;
+    const requestId = `${senderUid}_${user.uid}`;
     try {
-      const myRef = doc(db, 'users', user.uid);
-      const senderRef = doc(db, 'users', senderUid);
-
-      await updateDoc(myRef, { friendRequestsReceived: arrayRemove(senderUid) });
-      await updateDoc(senderRef, { friendRequestsSent: arrayRemove(user.uid) });
+      await deleteDoc(doc(db, 'friend_requests', requestId));
       toast.success("Request declined.");
     } catch (err) {
       console.error("Rejection failed:", err);
@@ -456,34 +522,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   /** Cancels an outgoing request. */
-const cancelFriendRequest = async (targetUid: string) => {
-  if (!user) return;
-  const batch = writeBatch(db);
-  const myRef = doc(db, 'users', user.uid);
-  const targetRef = doc(db, 'users', targetUid);
-
-  // Remove target from my sent requests (owner – allowed)
-  batch.update(myRef, {
-    friendRequestsSent: arrayRemove(targetUid)
-  });
-
-  // Remove myself from target's received requests (non‑owner – now allowed via Case 1 removal)
-  batch.update(targetRef, {
-    friendRequestsReceived: arrayRemove(user.uid)
-  });
-
-  await batch.commit();
-};
+  const cancelFriendRequest = async (targetUid: string) => {
+    if (!user) return;
+    const requestId = `${user.uid}_${targetUid}`;
+    try {
+      await deleteDoc(doc(db, 'friend_requests', requestId));
+      toast.success("Request cancelled.");
+    } catch (err) {
+      console.error("Cancellation failed:", err);
+      toast.error("Failed to cancel request.");
+    }
+  };
 
   /** Severs a mutual connection. */
   const removeFriend = async (friendUid: string) => {
     if (!user) return;
+    
     try {
-      const myRef = doc(db, 'users', user.uid);
-      const friendRef = doc(db, 'users', friendUid);
+      const q = query(
+        collection(db, 'friend_requests'),
+        where('participants', 'array-contains', user.uid),
+        where('status', '==', 'accepted')
+      );
+      const snap = await getDocs(q);
+      const requestDoc = snap.docs.find(d => {
+        const data = d.data();
+        return data.participants.includes(friendUid);
+      });
 
-      await updateDoc(myRef, { friends: arrayRemove(friendUid) });
-      await updateDoc(friendRef, { friends: arrayRemove(user.uid) });
+      if (requestDoc) {
+        await deleteDoc(requestDoc.ref);
+        toast.success("Connection severed.");
+      }
     } catch (err) {
       console.error("Removal failed:", err);
       toast.error("Failed to remove friend.");
@@ -692,7 +762,7 @@ const cancelFriendRequest = async (targetUid: string) => {
 
   return (
     <AuthContext.Provider value={{ 
-      user, isAdmin, isListener, loading, login, signup, logout, updateProfile,
+      user, friends, incomingRequests, outgoingRequests, isAdmin, isListener, loading, login, signup, logout, updateProfile,
       sendFriendRequest, acceptFriendRequest, rejectFriendRequest, cancelFriendRequest, removeFriend,
       refreshAuth, resendVerificationEmail, loginAnonymously, linkAccount, checkUsernameAvailability,
       applyToBeListener, approveListener, rejectListener, toggleListenerActive
