@@ -469,29 +469,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  /** 
+    /** 
    * Confirms a mutual friendship. 
    * Logic: 
-   * 1. Updates 'friends' arrays on both documents (using per-user update logic allowed by rules).
-   * 2. Deletes the request from 'friend_requests'.
-   * 3. Initializes a Chat record.
+   * 1. Updates the request status to 'accepted' in friend_requests.
+   * 2. Initializes a Chat record.
    */
   const acceptFriendRequest = async (senderUid: string) => {
-    if (!user) return;
+    if (!user) {
+      console.warn("acceptFriendRequest called without authenticated user");
+      return;
+    }
     const requestId = `${senderUid}_${user.uid}`;
+    console.log(`Attempting to accept friend request: ${requestId} for user: ${user.uid}`);
     
     try {
       const requestRef = doc(db, 'friend_requests', requestId);
       
-      // Update the request status to 'accepted'
-      // Rules allow: participants can update status
-      await updateDoc(requestRef, { status: 'accepted' });
+      // 1. Update the request status to 'accepted'
+      console.log("Stepping 1: Updating friend_requests status...");
+      await updateDoc(requestRef, { status: 'accepted' }).catch(err => {
+        console.error("DEBUG: Failed to update friend_requests. Check if rules allow 'update' on this doc for this user.", err);
+        throw err;
+      });
 
-      // Create chat metadata
-      const chatId = user.uid < senderUid ? `${user.uid}_${senderUid}` : `${senderUid}_${user.uid}`;
-      const senderSnap = await firestoreGetDoc(doc(db, 'users', senderUid));
+      // 2. Fetch sender data for chat metadata
+      console.log("Stepping 2: Fetching sender profile...");
+      const senderSnap = await firestoreGetDoc(doc(db, 'users', senderUid)).catch(err => {
+        console.error("DEBUG: Failed to fetch sender profile. Check 'users' read rules.", err);
+        throw err;
+      });
       const senderData = senderSnap.data();
 
+      // 3. Create chat metadata
+      console.log("Stepping 3: Initializing chat document...");
+      const chatId = user.uid < senderUid ? `${user.uid}_${senderUid}` : `${senderUid}_${user.uid}`;
       await setDoc(doc(db, 'chats', chatId), {
         participants: [user.uid, senderUid],
         lastActivity: serverTimestamp(),
@@ -499,12 +511,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         type: 'social',
         [`participantNames.${user.uid}`]: user.username,
         [`participantNames.${senderUid}`]: senderData?.username || 'New Friend'
-      }, { merge: true });
+      }, { merge: true }).catch(err => {
+        console.error("DEBUG: Failed to create chat doc. Check 'chats' rules.", err);
+        throw err;
+      });
 
       toast.success("New connection established!");
-    } catch (err) {
-      console.error("Acceptance failed:", err);
-      toast.error("Failed to accept connection.");
+    } catch (err: any) {
+      console.error("Full Acceptance Trace:", err);
+      if (err.code === 'permission-denied') {
+        toast.error("Permission Denied: Ensure production security rules are updated.");
+      } else {
+        toast.error("Failed to accept connection.");
+      }
     }
   };
 
