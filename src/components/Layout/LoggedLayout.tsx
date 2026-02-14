@@ -65,7 +65,7 @@ const LoggedLayout: React.FC<LoggedLayoutProps> = ({ children }) => {
       <div className="container mx-auto px-4 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_280px] gap-8">
           
-          {/* Left Sidebar */}
+          {/* Left Sidebar (Desktop Only) */}
           <aside className="hidden lg:flex flex-col gap-6 sticky top-28 h-fit">
             <div className="bg-hmo-card border border-hmo-border rounded-3xl p-6">
               <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-6">Categories</h3>
@@ -109,10 +109,45 @@ const LoggedLayout: React.FC<LoggedLayoutProps> = ({ children }) => {
 
           {/* Main Content */}
           <main className="min-w-0">
+            {/* Mobile/Tablet categories and help banner (Visible only on < lg) */}
+            <div className="flex lg:hidden flex-col gap-6 mb-8">
+              {/* Compact horizontal categories for mobile */}
+              <div className="bg-hmo-card border border-hmo-border rounded-3xl p-6 overflow-hidden">
+                <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4">Categories</h3>
+                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                  {categories.map((cat) => (
+                    <button 
+                      key={cat.name} 
+                      disabled={cat.disabled}
+                      onClick={() => cat.name === 'Community Rooms' ? navigate('/rooms') : null}
+                      className={`flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl border transition-all ${cat.disabled ? 'opacity-40 grayscale border-hmo-border' : 'border-indigo-500/30 bg-indigo-500/5 active:scale-95'}`}
+                    >
+                      <div className={`w-1.5 h-1.5 rounded-full ${cat.color}`} />
+                      <span className="text-xs font-bold text-slate-300 whitespace-nowrap">{cat.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Get Help Banner (Mobile version) */}
+              <div className="bg-gradient-to-r from-primary to-accent border border-primary/20 rounded-3xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="text-center sm:text-left">
+                  <h4 className="text-sm font-black text-white uppercase tracking-tight">Need someone to talk to?</h4>
+                  <p className="text-[11px] text-white/70 font-bold uppercase tracking-widest mt-0.5">Approved listeners are active now.</p>
+                </div>
+                <button 
+                  onClick={handleGetHelp}
+                  className="w-full sm:w-auto px-8 py-3 bg-white text-primary rounded-xl text-xs font-black uppercase tracking-widest shadow-xl active:scale-95 transition-all"
+                >
+                  Get Help Now
+                </button>
+              </div>
+            </div>
+
             {children}
           </main>
 
-          {/* Right Sidebar */}
+          {/* Right Sidebar (Desktop Only) */}
           <aside className="hidden lg:flex flex-col gap-6 sticky top-28 h-fit">
             <div className="bg-hmo-card border border-hmo-border rounded-3xl p-6">
               <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-6">Community Rules</h3>
