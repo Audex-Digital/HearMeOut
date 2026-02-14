@@ -106,7 +106,16 @@ const Bookmarks: React.FC = () => {
   };
 
   const handleDeletePost = async (postId: string) => {
-    if (!user?.emailVerified || !isAdmin) return;
+    const postToDelete = posts.find(p => p.id === postId);
+    if (!postToDelete || !user) return;
+
+    const isOwner = user.uid === postToDelete.authorId;
+    
+    if (!isAdmin && !isOwner) {
+      toast.error("Permission denied.");
+      return;
+    }
+
     const confirmed = await alertService.delete('this community post');
     if (!confirmed) return;
     try {
@@ -114,6 +123,7 @@ const Bookmarks: React.FC = () => {
       toast.success("Post removed.");
     } catch (err) {
       console.error("Deletion failed:", err);
+      toast.error("Failed to remove post.");
     }
   };
 

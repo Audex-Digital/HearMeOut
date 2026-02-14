@@ -70,7 +70,7 @@ service cloud.firestore {
       match /comments/{commentId} {
         allow read: if isAuth();
         allow create: if isAuth();
-        allow update, delete: if isAuth() && (isOwner(resource.data.authorId) || isAdmin());
+        allow update, delete: if isAuth() && (isOwner(resource.data.userId) || isAdmin());
       }
     }
 

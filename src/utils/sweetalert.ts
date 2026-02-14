@@ -1,136 +1,151 @@
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 
-// Initialize with React content support
-export const MySwal = withReactContent(Swal);
+/**
+ * Enhanced SweetAlert2 Configuration for HearMeOut.
+ * Uses custom Tailwind CSS classes for a seamless dark theme experience.
+ */
 
-// HMO Theme Configuration
-const theme = {
-  background: '#0d1117', // hmo-card
-  color: '#fff',
-  confirmButtonColor: '#6366f1', // primary
-  cancelButtonColor: '#ef4444', // red-500 equivalent
+// Initialize with React content support
+const MySwal = withReactContent(Swal);
+
+// Global theme variables (matching user request)
+const HMO_THEME = {
+  background: '#1e1e2f',
+  text: '#f5f5f5',
+  primary: '#4f46e5',
+  primaryHover: '#4338ca',
+  secondary: '#374151',
+  error: '#ef4444',
+  rounding: '1rem'
 };
 
-// Pre-configured alert types for consistency
+// Shared custom classes to avoid redundancy and fix TypeScript errors
+const BASE_CUSTOM_CLASSES = {
+  popup: 'rounded-[1rem] border border-white/10 shadow-2xl',
+  title: 'text-xl font-bold text-white tracking-tight pt-4',
+  htmlContainer: 'text-sm text-slate-300 font-medium',
+  confirmButton: 'px-8 py-3 bg-[#4f46e5] hover:bg-[#4338ca] text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all mx-2 shadow-lg shadow-indigo-500/20',
+  cancelButton: 'px-8 py-3 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all mx-2',
+  input: 'bg-[#05070a] border border-white/10 rounded-xl text-white px-4 py-2 focus:border-indigo-500 outline-none transition-all'
+};
+
+/**
+ * Reusable Global SweetAlert2 Mixin
+ * Centralizes the theme logic so all popups share the same aesthetic.
+ */
+export const hmoAlert = MySwal.mixin({
+  background: HMO_THEME.background,
+  color: HMO_THEME.text,
+  buttonsStyling: false,
+  customClass: BASE_CUSTOM_CLASSES,
+  showClass: {
+    popup: 'animate__animated animate__fadeInUp animate__faster'
+  },
+  hideClass: {
+    popup: 'animate__animated animate__fadeOutDown animate__faster'
+  }
+});
+
+/**
+ * alertService
+ * Higher-level abstractions for common HMO interactions.
+ */
 export const alertService = {
+  /** Displays a success message. */
   success: (title: string, message?: string) => 
-    MySwal.fire({
+    hmoAlert.fire({
       icon: 'success',
+      iconColor: '#10b981',
       title,
       text: message,
       timer: 3000,
-      showConfirmButton: true,
-      background: theme.background,
-      color: theme.color,
-      confirmButtonColor: theme.confirmButtonColor,
     }),
 
+  /** Displays an error message. */
   error: (title: string, message?: string) => 
-    MySwal.fire({
+    hmoAlert.fire({
       icon: 'error',
+      iconColor: HMO_THEME.error,
       title,
       text: message,
-      background: theme.background,
-      color: theme.color,
-      confirmButtonColor: theme.confirmButtonColor,
     }),
 
-  warning: (title: string, message?: string) => 
-    MySwal.fire({
-      icon: 'warning',
-      title,
-      text: message,
-      background: theme.background,
-      color: theme.color,
-      confirmButtonColor: theme.confirmButtonColor,
-    }),
-
+  /** Displays an info message. */
   info: (title: string, message?: string) => 
-    MySwal.fire({
+    hmoAlert.fire({
       icon: 'info',
+      iconColor: HMO_THEME.primary,
       title,
       text: message,
-      background: theme.background,
-      color: theme.color,
-      confirmButtonColor: theme.confirmButtonColor,
     }),
 
-  confirm: async (title: string, message?: string): Promise<boolean> => {
-    const result = await MySwal.fire({
+  /** Displays a warning message. */
+  warning: (title: string, message?: string) => 
+    hmoAlert.fire({
+      icon: 'warning',
+      iconColor: '#f59e0b',
+      title,
+      text: message,
+    }),
+
+  /** Confirmation dialog (Async). */
+  confirm: async (title: string, message?: string, confirmText = 'Yes, Proceed'): Promise<boolean> => {
+    const result = await hmoAlert.fire({
       title,
       text: message,
       icon: 'question',
+      iconColor: HMO_THEME.primary,
       showCancelButton: true,
-      confirmButtonColor: theme.confirmButtonColor,
-      cancelButtonColor: theme.cancelButtonColor,
-      confirmButtonText: 'Yes',
-      cancelButtonText: 'Cancel',
-      background: theme.background,
-      color: theme.color,
+      confirmButtonText: confirmText,
+      cancelButtonText: 'Cancel'
     });
     return result.isConfirmed;
   },
 
+  /** Specialized Delete confirmation. */
   delete: async (itemName?: string): Promise<boolean> => {
-    const result = await MySwal.fire({
+    const result = await hmoAlert.fire({
       title: 'Are you sure?',
-      text: itemName ? `Delete "${itemName}"? This cannot be undone.` : 'This action cannot be undone.',
+      text: itemName ? `Permanently remove "${itemName}"?` : 'This action cannot be undone.',
       icon: 'warning',
+      iconColor: HMO_THEME.error,
       showCancelButton: true,
-      confirmButtonColor: theme.cancelButtonColor,
-      cancelButtonColor: theme.confirmButtonColor, // Swap for destructive action
       confirmButtonText: 'Delete',
       cancelButtonText: 'Cancel',
-      background: theme.background,
-      color: theme.color,
+      customClass: {
+        ...BASE_CUSTOM_CLASSES,
+        confirmButton: 'px-8 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all mx-2 shadow-lg shadow-red-500/20'
+      }
     });
     return result.isConfirmed;
   },
 
-  prompt: async (title: string, placeholder?: string): Promise<string | null> => {
-    const { value } = await MySwal.fire({
-      title,
-      input: 'text',
-      inputPlaceholder: placeholder || 'Enter value',
-      showCancelButton: true,
-      confirmButtonColor: theme.confirmButtonColor,
-      confirmButtonText: 'Submit',
-      cancelButtonText: 'Cancel',
-      background: theme.background,
-      color: theme.color,
-    });
-    return value;
-  },
-
+  /** Quick toast notifications. */
   toast: {
     success: (message: string) => {
-      const Toast = Swal.mixin({
+      hmoAlert.fire({
         toast: true,
         position: 'top-end',
+        icon: 'success',
+        title: message,
         showConfirmButton: false,
         timer: 3000,
-        timerProgressBar: true,
-        background: theme.background,
-        color: theme.color,
-        didOpen: (toast) => {
-          toast.addEventListener('mouseenter', Swal.stopTimer);
-          toast.addEventListener('mouseleave', Swal.resumeTimer);
-        }
+        timerProgressBar: true
       });
-      Toast.fire({ icon: 'success', title: message });
     },
     error: (message: string) => {
-      const Toast = Swal.mixin({
+      hmoAlert.fire({
         toast: true,
         position: 'top-end',
+        icon: 'error',
+        title: message,
         showConfirmButton: false,
         timer: 3000,
-        timerProgressBar: true,
-        background: theme.background,
-        color: theme.color,
+        timerProgressBar: true
       });
-      Toast.fire({ icon: 'error', title: message });
     }
   }
 };
+
+export default alertService;

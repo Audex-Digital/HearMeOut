@@ -115,18 +115,30 @@ const Feed: React.FC = () => {
   };
 
   /** 
-   * Deletes a post (Admin only feature).
+   * Deletes a post (Owner or Admin feature).
    */
   const handleDeletePost = async (postId: string) => {
-    if (!user?.emailVerified || !isAdmin) return;
+    const postToDelete = posts.find(p => p.id === postId);
+    if (!postToDelete || !user) return;
+
+    const isOwner = user.uid === postToDelete.authorId;
+    const isActuallyAdmin = isAdmin; // from useAuth
+    
+    // Safety check for permissions: Must be owner or admin
+    if (!isActuallyAdmin && !isOwner) {
+      toast.error("You don't have permission to delete this post.");
+      return;
+    }
+
     const confirmed = await alertService.delete('this community post');
     if (!confirmed) return;
+
     try {
       await deleteDoc(doc(db, 'posts', postId));
       toast.success("Post removed.");
     } catch (err) {
-      console.error("Admin deletion failed:", err);
-      toast.error("Critical Failure: Post could not be deleted.");
+      console.error("Deletion failed:", err);
+      toast.error("Critical Failure: Post could not be removed.");
     }
   };
 
