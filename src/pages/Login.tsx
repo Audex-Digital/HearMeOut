@@ -22,7 +22,7 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [isAnonymousLoading, setIsAnonymousLoading] = useState(false);
-  
+
   const { login, loginAnonymously } = useAuth();
   const navigate = useNavigate();
 
@@ -33,7 +33,7 @@ const Login: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) return toast.error("Credentials required.");
-    
+
     setLoading(true);
     try {
       await login(email, password);
@@ -67,7 +67,7 @@ const Login: React.FC = () => {
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[120px] animate-pulse-slow"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] bg-accent/20 rounded-full blur-[100px] animate-pulse-slow"></div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         className="w-full max-w-md bg-hmo-card border border-hmo-border rounded-[2.5rem] p-8 sm:p-12 shadow-2xl relative z-10"
@@ -85,37 +85,43 @@ const Login: React.FC = () => {
             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Email Address</label>
             <div className="relative group">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary transition-colors" size={20} />
-              <input 
-                type="email" 
+              <input
+                type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                 placeholder="yours@example.com"
                 className="w-full bg-hmo-dark border border-hmo-border rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all text-sm font-medium"
               />
             </div>
           </div>
-          
+
           <div className="space-y-2">
             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Password</label>
             <div className="relative group">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-accent transition-colors" size={20} />
-              <input 
-                type="password" 
+              <input
+                type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 className="w-full bg-hmo-dark border border-hmo-border rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-accent/50 focus:ring-4 focus:ring-accent/5 transition-all text-sm font-medium"
               />
             </div>
           </div>
 
-          <button 
-            type="submit" 
+          <div className="flex justify-end">
+            <Link to="/reset-password" className="text-xs font-bold text-primary hover:text-accent transition-colors">
+              Forgot Password?
+            </Link>
+          </div>
+
+          <button
+            type="submit"
             disabled={loading}
             className="w-full bg-gradient-to-r from-primary to-accent text-white rounded-2xl py-4 font-bold text-sm shadow-xl shadow-primary/20 hover:shadow-primary/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group disabled:opacity-50"
           >
             {loading ? "Verifying..." : "Login"}
-            {!loading && <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" /> }
+            {!loading && <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />}
           </button>
         </form>
 
@@ -125,7 +131,7 @@ const Login: React.FC = () => {
           <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-hmo-border"></div>
         </div>
 
-        <button 
+        <button
           onClick={handleAnonymousLogin}
           disabled={isAnonymousLoading}
           className="w-full mt-8 py-4 bg-white/5 border border-hmo-border rounded-2xl text-slate-300 font-bold text-sm flex items-center justify-center gap-3 hover:bg-white/10 hover:text-white transition-all group disabled:opacity-50"

@@ -35,25 +35,30 @@ import ChatList from './pages/ChatList';
 import Rooms from './pages/Rooms';
 import Bookmarks from './pages/Bookmarks';
 import Verify from './pages/Verify';
+import ResetPassword from './pages/ResetPassword';
 
 import NotificationSystem from './components/Notifications/NotificationSystem';
 import { Toaster } from 'react-hot-toast';
+
+interface RouteProps {
+  children: React.ReactNode;
+}
 
 /**
  * Higher-Order Component to restrict access to authenticated users only.
  * Redirects unauthenticated traffic to /login.
  */
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const ProtectedRoute: React.FC<RouteProps> = ({ children }) => {
   const { user, loading } = useAuth();
-  
+
   if (loading) return (
     <div className="min-h-screen bg-hmo-dark flex items-center justify-center">
       <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
     </div>
   );
-  
+
   if (!user) return <Navigate to="/login" replace />;
-  
+
   return <>{children}</>;
 };
 
@@ -61,17 +66,17 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
  * Higher-Order Component to restrict access to Admin-level users only.
  * Redirects unauthorized traffic to the general /feed.
  */
-const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const AdminRoute: React.FC<RouteProps> = ({ children }) => {
   const { user, isAdmin, loading } = useAuth();
-  
+
   if (loading) return (
     <div className="min-h-screen bg-hmo-dark flex items-center justify-center">
       <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
     </div>
   );
-  
+
   if (!user || !isAdmin) return <Navigate to="/feed" replace />;
-  
+
   return <>{children}</>;
 };
 
@@ -80,12 +85,12 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
  * (e.g. Login, Signup, Landing). 
  * Redirects authenticated users to /feed.
  */
-const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const PublicRoute: React.FC<RouteProps> = ({ children }) => {
   const { user, loading } = useAuth();
-  
+
   if (loading) return null;
   if (user) return <Navigate to="/feed" replace />;
-  
+
   return <>{children}</>;
 };
 
@@ -98,8 +103,8 @@ const AppContent: React.FC = () => {
   return (
     <div className="bg-hmo-dark min-h-screen text-slate-200 selection:bg-primary/30">
       {/* Global UI Overlays */}
-      <Toaster 
-        position="bottom-right" 
+      <Toaster
+        position="bottom-right"
         toastOptions={{
           duration: 5000,
           style: {
@@ -107,7 +112,7 @@ const AppContent: React.FC = () => {
             color: '#fff',
             border: '1px solid rgba(255,255,255,0.1)'
           }
-        }} 
+        }}
       />
       <Navbar />
       <NotificationSystem />
@@ -117,8 +122,9 @@ const AppContent: React.FC = () => {
         <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
         <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
+        <Route path="/reset-password" element={<PublicRoute><ResetPassword /></PublicRoute>} />
         <Route path="/verify" element={<Verify />} />
-        
+
         {/* --- Public Informational Routes --- */}
         <Route path="/contact" element={<Contact />} />
         <Route path="/privacy" element={<Privacy />} />
@@ -127,20 +133,20 @@ const AppContent: React.FC = () => {
 
         {/* --- Authenticated Routes --- */}
         <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
-        
+
         {/* Public profile view using username handle */}
         <Route path="/profile/:username" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
-        
+
         {/* Current user's private dashboard */}
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-        
+
         <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
         <Route path="/create-post" element={<ProtectedRoute><CreatePost /></ProtectedRoute>} />
         <Route path="/chat/:uid" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
         <Route path="/chats" element={<ProtectedRoute><ChatList /></ProtectedRoute>} />
         <Route path="/bookmarks" element={<ProtectedRoute><Bookmarks /></ProtectedRoute>} />
         <Route path="/rooms" element={<ProtectedRoute><Rooms /></ProtectedRoute>} />
-        
+
         {/* --- Administrative Routes --- */}
         <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
 
