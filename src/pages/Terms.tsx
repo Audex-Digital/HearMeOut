@@ -4,17 +4,17 @@ import Footer from '../components/Footer/Footer';
 
 const Terms: React.FC = () => {
   return (
-    <div className="flex flex-col min-h-screen bg-hmo-dark text-slate-200">
+    <div className="flex flex-col min-h-screen bg-hmo-dark hmo-text-primary transition-colors duration-300">
       <div className="flex-grow pt-32">
         <div className="container mx-auto px-4 max-w-4xl pb-20">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-hmo-card border border-hmo-border p-8 sm:p-12 rounded-[2.5rem] shadow-2xl"
+            className="hmo-card p-8 sm:p-12 shadow-2xl dark:shadow-none"
           >
-            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-8 border-b border-hmo-border pb-6">Terms of Service</h1>
+            <h1 className="text-3xl sm:text-4xl font-bold hmo-text-primary mb-8 border-b border-hmo-border pb-6">Terms of Service</h1>
             
-            <div className="prose prose-invert max-w-none space-y-8 text-slate-400">
+            <div className="prose prose-invert max-w-none space-y-8 hmo-text-secondary">
               <section>
                 <h2 className="text-xl font-bold text-white mb-4 uppercase tracking-wider text-accent">1. Acceptance of Terms</h2>
                 <p>
@@ -50,8 +50,8 @@ const Terms: React.FC = () => {
                 </p>
               </section>
 
-              <section className="bg-white/5 p-6 rounded-2xl border border-white/10">
-                <p className="text-sm italic">
+              <section className="bg-slate-50 dark:bg-white/5 p-6 rounded-2xl border border-hmo-border">
+                <p className="text-sm italic hmo-text-secondary">
                   Effective Date: February 2026. For legal inquiries, please contact legal@hearmeout.com.
                 </p>
               </section>

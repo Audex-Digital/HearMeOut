@@ -113,11 +113,11 @@ const Rooms: React.FC = () => {
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
           <div>
-            <h1 className="text-3xl font-black text-white mb-2 tracking-tight flex items-center gap-3">
+            <h1 className="text-3xl font-black hmo-text-primary mb-2 tracking-tight flex items-center gap-3">
               <Users2 size={32} className="text-primary" />
               Community Rooms
             </h1>
-            <p className="text-slate-500 font-medium">Join moderated group discussions and support circles.</p>
+            <p className="hmo-text-secondary font-medium">Join moderated group discussions and support circles.</p>
           </div>
           
           <button 
@@ -138,13 +138,13 @@ const Rooms: React.FC = () => {
               placeholder="Search rooms by topic..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-6 py-4 bg-hmo-card border border-hmo-border rounded-2xl text-white placeholder:text-slate-600 focus:outline-none focus:border-primary/50 transition-all shadow-inner"
+              className="w-full pl-12 pr-6 py-4 hmo-card border border-hmo-border rounded-2xl hmo-text-primary placeholder:hmo-text-muted focus:outline-none focus:border-primary/50 transition-all shadow-inner"
             />
           </div>
-          <div className="px-6 py-4 bg-hmo-card border border-hmo-border rounded-2xl flex items-center gap-3 text-slate-400">
+          <div className="px-6 py-4 hmo-card border border-hmo-border rounded-2xl flex items-center gap-3 hmo-text-muted">
             <Users size={18} className="text-primary" />
             <span className="text-xs font-black uppercase tracking-widest">
-              <span className="text-white">{rooms.length}</span> Active Rooms
+              <span className="hmo-text-primary">{rooms.length}</span> Active Rooms
             </span>
           </div>
         </div>
@@ -153,13 +153,13 @@ const Rooms: React.FC = () => {
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 opacity-50">
             {[1, 2, 3, 4].map(i => (
-              <div key={i} className="h-48 bg-hmo-card border border-hmo-border rounded-[2rem] animate-pulse" />
+              <div key={i} className="h-48 hmo-card border border-hmo-border rounded-[2rem] animate-pulse" />
             ))}
           </div>
         ) : filteredRooms.length === 0 ? (
-          <div className="py-20 text-center bg-hmo-card border border-hmo-border rounded-[2.5rem] border-dashed">
-            <MessageSquare size={48} className="mx-auto text-slate-700 mb-4" />
-            <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">No rooms found matching your search.</p>
+          <div className="py-20 text-center hmo-card border border-hmo-border rounded-[2.5rem] border-dashed">
+            <MessageSquare size={48} className="mx-auto hmo-text-muted opacity-20 mb-4" />
+            <p className="hmo-text-muted font-bold uppercase tracking-widest text-xs">No rooms found matching your search.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -169,7 +169,7 @@ const Rooms: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 whileHover={{ y: -5 }}
-                className="bg-hmo-card border border-hmo-border rounded-[2rem] p-8 relative overflow-hidden group cursor-pointer"
+                className="hmo-card p-8 shadow-xl dark:shadow-none relative overflow-hidden group cursor-pointer"
               >
                 <div className="relative z-10">
                   <div className="flex justify-between items-start mb-4">
@@ -192,17 +192,17 @@ const Rooms: React.FC = () => {
                     )}
                   </div>
 
-                  <h3 className="text-xl font-black text-white mb-2 line-clamp-1">{room.name}</h3>
-                  <p className="text-slate-400 text-sm mb-6 line-clamp-2 leading-relaxed h-10 italic">
+                  <h3 className="text-xl font-black hmo-text-primary mb-2 line-clamp-1">{room.name}</h3>
+                  <p className="hmo-text-secondary text-sm mb-6 line-clamp-2 leading-relaxed h-10 italic">
                     "{room.description}"
                   </p>
 
                   <div className="flex items-center justify-between pt-6 border-t border-hmo-border/50">
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-slate-800 border border-hmo-border flex items-center justify-center text-[10px] font-bold text-slate-500">
+                      <div className="w-6 h-6 rounded-full bg-slate-50 dark:bg-slate-800 border border-hmo-border flex items-center justify-center text-[10px] font-bold hmo-text-muted">
                         {room.ownerName[0]?.toUpperCase()}
                       </div>
-                      <span className="text-xs font-bold text-slate-500">@{room.ownerName}</span>
+                      <span className="text-xs font-bold hmo-text-muted">@{room.ownerName}</span>
                     </div>
                     <div className="flex items-center gap-1.5 text-primary text-xs font-black">
                       <Users size={14} />
@@ -220,12 +220,12 @@ const Rooms: React.FC = () => {
 
         {/* Info Box */}
         <div className="mt-12 p-8 bg-indigo-500/5 border border-indigo-500/10 rounded-[2rem] flex flex-col md:flex-row items-center gap-6">
-          <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center text-indigo-400 shrink-0">
+          <div className="w-16 h-16 bg-slate-50 dark:bg-white/5 rounded-2xl flex items-center justify-center text-indigo-400 shrink-0">
             <Shield size={32} />
           </div>
           <div>
-            <h4 className="text-white font-black uppercase tracking-tighter text-lg mb-1">Moderated Safespace</h4>
-            <p className="text-slate-500 text-sm leading-relaxed">
+            <h4 className="hmo-text-primary font-black uppercase tracking-tighter text-lg mb-1">Moderated Safespace</h4>
+            <p className="hmo-text-secondary text-sm leading-relaxed">
               Every room is monitored by our <span className="text-indigo-400 font-bold">Approved Listeners</span> and <span className="text-primary font-bold">Admins</span>. 
               Report any harassment immediately to community staff.
             </p>
@@ -247,7 +247,7 @@ const Rooms: React.FC = () => {
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                className="bg-hmo-card border border-hmo-border w-full max-w-lg rounded-[2.5rem] p-8 sm:p-12 relative z-10 shadow-3xl"
+                className="hmo-card w-full max-w-lg p-8 sm:p-12 relative z-10 shadow-3xl dark:shadow-none"
               >
                 <button 
                   onClick={() => setShowCreateModal(false)}
@@ -260,8 +260,8 @@ const Rooms: React.FC = () => {
                   <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mx-auto mb-6">
                     <Plus size={32} />
                   </div>
-                  <h2 className="text-2xl font-black text-white mb-2">Host a Session</h2>
-                  <p className="text-slate-500 text-sm font-medium">Create a safe space for your community.</p>
+                  <h2 className="text-2xl font-black hmo-text-primary mb-2">Host a Session</h2>
+                  <p className="hmo-text-secondary text-sm font-medium">Create a safe space for your community.</p>
                 </div>
 
                 <form onSubmit={handleCreateRoom} className="space-y-6">
@@ -273,7 +273,7 @@ const Rooms: React.FC = () => {
                       placeholder="e.g. Late Night Venting"
                       value={newName}
                       onChange={(e) => setNewName(e.target.value)}
-                      className="w-full px-6 py-4 bg-[#05070a] border border-hmo-border rounded-2xl text-white placeholder:text-slate-700 focus:outline-none focus:border-primary transition-all"
+                      className="w-full px-6 py-4 bg-slate-50 dark:bg-hmo-dark border border-hmo-border rounded-2xl hmo-text-primary placeholder:hmo-text-muted focus:outline-none focus:border-primary transition-all"
                     />
                   </div>
                   <div>
@@ -284,7 +284,7 @@ const Rooms: React.FC = () => {
                       placeholder="Describe the vibes of your room..."
                       value={newDesc}
                       onChange={(e) => setNewDesc(e.target.value)}
-                      className="w-full px-6 py-4 bg-[#05070a] border border-hmo-border rounded-2xl text-white placeholder:text-slate-700 focus:outline-none focus:border-primary transition-all resize-none italic"
+                      className="w-full px-6 py-4 bg-slate-50 dark:bg-hmo-dark border border-hmo-border rounded-2xl hmo-text-primary placeholder:hmo-text-muted focus:outline-none focus:border-primary transition-all resize-none italic"
                     />
                   </div>
                   

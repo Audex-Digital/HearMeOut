@@ -68,7 +68,7 @@ const Signup: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-hmo-dark flex items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-hmo-dark flex items-center justify-center p-6 relative overflow-hidden transition-colors duration-300">
       {/* Dynamic Background Elements */}
       <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent/20 rounded-full blur-[120px] animate-pulse-slow"></div>
       <div className="absolute bottom-[-10%] left-[-10%] w-[30%] h-[30%] bg-primary/20 rounded-full blur-[100px] animate-pulse-slow"></div>
@@ -76,14 +76,14 @@ const Signup: React.FC = () => {
       <motion.div 
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="w-full max-w-md bg-hmo-card border border-hmo-border rounded-[2.5rem] p-8 sm:p-12 shadow-2xl relative z-10"
+        className="hmo-card w-full max-w-md p-8 sm:p-12 shadow-2xl dark:shadow-none"
       >
         <header className="text-center mb-10">
           <div className="w-16 h-16 bg-gradient-to-tr from-accent to-primary rounded-3xl mx-auto mb-6 flex items-center justify-center shadow-lg shadow-accent/20 transform rotate-6">
             <UserPlus className="text-white" size={32} />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2 leading-tight">Create Account</h1>
-          <p className="text-slate-500 text-sm font-medium tracking-wide">Join a safe space for open thoughts.</p>
+          <h1 className="text-3xl font-bold hmo-text-primary mb-2 leading-tight">Create Account</h1>
+          <p className="hmo-text-secondary text-sm font-medium tracking-wide">Join a safe space for open thoughts.</p>
         </header>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -97,38 +97,38 @@ const Signup: React.FC = () => {
 
           {/* Email Input */}
           <div className="space-y-2">
-            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Work/Personal Email</label>
+            <label className="text-[10px] font-bold hmo-text-muted uppercase tracking-widest ml-1">Work/Personal Email</label>
             <div className="relative group">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary transition-colors" size={20} />
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 hmo-text-muted group-focus-within:text-primary transition-colors" size={20} />
               <input 
                 type="email" 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="yours@example.com"
-                className="w-full bg-hmo-dark border border-hmo-border rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all text-sm font-medium"
+                className="w-full bg-slate-50 dark:bg-hmo-dark border border-hmo-border rounded-2xl py-4 pl-12 pr-4 hmo-text-primary focus:outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all text-sm font-medium"
               />
             </div>
           </div>
           
           {/* Password Input */}
           <div className="space-y-2">
-            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Set Password</label>
+            <label className="text-[10px] font-bold hmo-text-muted uppercase tracking-widest ml-1">Set Password</label>
             <div className="relative group">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-accent transition-colors" size={20} />
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 hmo-text-muted group-focus-within:text-accent transition-colors" size={20} />
               <input 
                 type="password" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Min. 6 chars"
-                className="w-full bg-hmo-dark border border-hmo-border rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-accent/50 focus:ring-4 focus:ring-accent/5 transition-all text-sm font-medium"
+                className="w-full bg-slate-50 dark:bg-hmo-dark border border-hmo-border rounded-2xl py-4 pl-12 pr-4 hmo-text-primary focus:outline-none focus:border-accent/50 focus:ring-4 focus:ring-accent/5 transition-all text-sm font-medium"
               />
             </div>
           </div>
 
           {/* Privacy Disclaimer */}
-          <div className="flex items-start gap-3 p-4 bg-white/5 border border-hmo-border rounded-2xl my-6">
+          <div className="flex items-start gap-3 p-4 bg-slate-50 dark:bg-white/5 border border-hmo-border rounded-2xl my-6">
             <ShieldCheck size={20} className="text-primary shrink-0" />
-            <p className="text-[10px] text-slate-500 leading-relaxed font-medium capitalize">
+            <p className="text-[10px] hmo-text-muted leading-relaxed font-medium capitalize">
                 Your privacy is our priority. We handle your data according to our secure, anonymous standards.
             </p>
           </div>
@@ -144,7 +144,7 @@ const Signup: React.FC = () => {
         </form>
 
         <footer className="mt-10 text-center">
-          <p className="text-slate-500 text-sm font-medium">
+          <p className="hmo-text-muted text-sm font-medium">
             Already a member?{' '}
             <Link to="/login" className="text-accent font-bold hover:underline transition-all underline-offset-4">
               Login Instead

@@ -200,7 +200,7 @@ const CommentModal: React.FC<CommentModalProps> = ({ post, onClose }) => {
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative w-full max-w-xl bg-hmo-card border border-hmo-border rounded-3xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden"
+            className="relative w-full max-w-xl hmo-card rounded-3xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden"
           >
             {/* Header */}
             <div className="p-6 border-b border-hmo-border flex items-center justify-between">
@@ -209,11 +209,11 @@ const CommentModal: React.FC<CommentModalProps> = ({ post, onClose }) => {
                   <MessageCircle size={20} />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-white leading-tight">Post Replies</h2>
+                  <h2 className="text-lg font-bold hmo-text-primary leading-tight">Post Replies</h2>
                   <Link 
                     to={`/profile/@${post.username}`} 
                     onClick={onClose}
-                    className="text-xs text-slate-500 hover:text-white transition-colors hover:underline"
+                    className="text-xs hmo-text-muted hover:hmo-text-primary transition-colors hover:underline"
                   >
                     Shared by @{post.username}
                   </Link>
@@ -221,15 +221,15 @@ const CommentModal: React.FC<CommentModalProps> = ({ post, onClose }) => {
               </div>
               <button 
                 onClick={onClose}
-                className="p-2 text-slate-500 hover:text-white transition-colors"
+                className="p-2 hmo-text-muted hover:hmo-text-primary transition-colors"
               >
                 <X size={24} />
               </button>
             </div>
 
             {/* Post Context Area */}
-            <div className="p-6 bg-white/[0.02] border-b border-hmo-border">
-              <p className="text-slate-300 text-sm italic line-clamp-2">
+            <div className="p-6 bg-slate-50 dark:bg-white/[0.02] border-b border-hmo-border">
+              <p className="hmo-text-secondary text-sm italic font-medium leading-relaxed">
                 "{post.content}"
               </p>
             </div>
@@ -249,24 +249,24 @@ const CommentModal: React.FC<CommentModalProps> = ({ post, onClose }) => {
                     <Link 
                       to={`/profile/@${comment.username}`}
                       onClick={onClose}
-                      className="w-8 h-8 rounded-full bg-slate-800 shrink-0 flex items-center justify-center text-[10px] font-bold text-slate-400 hover:scale-110 transition-transform"
+                      className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 shrink-0 flex items-center justify-center text-[10px] font-black hmo-text-muted hover:scale-110 transition-transform border border-hmo-border"
                     >
-                      {comment.username[0]}
+                      {comment.username[0]?.toUpperCase()}
                     </Link>
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <Link 
                           to={`/profile/@${comment.username}`}
                           onClick={onClose}
-                          className="text-xs font-bold text-white hover:underline"
+                          className="text-xs font-bold hmo-text-primary hover:underline"
                         >
                           {comment.username}
                         </Link>
-                        <span className="text-[10px] text-slate-500 uppercase font-bold tracking-tighter">
+                        <span className="text-[10px] hmo-text-muted uppercase font-bold tracking-tighter">
                           {getRelativeTime(comment.createdAt)}
                         </span>
                       </div>
-                      <p className="text-sm text-slate-300 leading-relaxed bg-white/5 p-3 rounded-2xl rounded-tl-none">
+                      <p className="text-sm hmo-text-primary leading-relaxed bg-slate-50 dark:bg-white/5 p-3 px-4 rounded-2xl rounded-tl-none border border-hmo-border/30 dark:border-transparent font-medium">
                         {comment.content}
                       </p>
                     </div>
@@ -274,7 +274,7 @@ const CommentModal: React.FC<CommentModalProps> = ({ post, onClose }) => {
                 ))
               ) : (
                 <div className="text-center py-10 opacity-40">
-                  <p className="text-sm italic">No replies yet. Be the first to share support.</p>
+                  <p className="text-sm hmo-text-secondary italic">No replies yet. Be the first to share support.</p>
                 </div>
               )}
             </div>
@@ -287,7 +287,7 @@ const CommentModal: React.FC<CommentModalProps> = ({ post, onClose }) => {
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                   placeholder="Supportive reply..."
-                  className="w-full bg-white/5 border border-hmo-border rounded-2xl px-5 py-4 text-sm text-white focus:outline-none focus:border-accent transition-all pr-14"
+                  className="w-full bg-slate-100 dark:bg-white/5 border border-hmo-border rounded-2xl px-5 py-4 text-sm hmo-text-primary focus:outline-none focus:border-accent transition-all pr-14 placeholder:hmo-text-muted"
                 />
                 <button 
                   type="submit"
@@ -301,8 +301,8 @@ const CommentModal: React.FC<CommentModalProps> = ({ post, onClose }) => {
                   )}
                 </button>
               </form>
-              <p className="text-[10px] text-slate-500 mt-4 text-center">
-                 Your supportive words can change someone's day.
+              <p className="text-[10px] hmo-text-muted mt-4 text-center px-4">
+                 Your supportive words can help heal someone today.
               </p>
             </div>
           </motion.div>

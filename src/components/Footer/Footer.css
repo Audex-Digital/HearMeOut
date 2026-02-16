@@ -91,14 +91,15 @@
 .social-circle {
   width: 28px;
   height: 28px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
   border-radius: 50%;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
   cursor: pointer;
 }
 
 .social-circle:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--glass-border);
 }
 
 @media (max-width: 1024px) {

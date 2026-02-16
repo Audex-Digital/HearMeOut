@@ -218,21 +218,21 @@ const AdminDashboard: React.FC = () => {
               <Shield size={24} />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white leading-tight">Admin Dashboard</h1>
-              <p className="text-slate-500 text-sm font-medium">Internal tools for community safety.</p>
+              <h1 className="text-2xl font-bold hmo-text-primary leading-tight">Admin Dashboard</h1>
+              <p className="hmo-text-secondary text-sm font-medium">Internal tools for community safety.</p>
             </div>
           </div>
           {/* Tab Filter */}
           <div className="flex bg-white/5 p-1 rounded-xl border border-hmo-border">
             <button 
               onClick={() => setFilter('all')}
-              className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${filter === 'all' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-slate-400 hover:text-white'}`}
+              className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${filter === 'all' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'hmo-text-muted hover:hmo-text-primary'}`}
             >
               All Users
             </button>
             <button 
               onClick={() => setFilter('applications')}
-              className={`relative px-4 py-2 rounded-lg text-xs font-bold transition-all ${filter === 'applications' ? 'bg-yellow-500 text-white shadow-lg shadow-yellow-500/20' : 'text-slate-400 hover:text-white'}`}
+              className={`relative px-4 py-2 rounded-lg text-xs font-bold transition-all ${filter === 'applications' ? 'bg-yellow-500 text-white shadow-lg shadow-yellow-500/20' : 'hmo-text-muted hover:hmo-text-primary'}`}
             >
               Applications
               {users.filter(u => u.listenerStatus === 'pending').length > 0 && (
@@ -241,7 +241,7 @@ const AdminDashboard: React.FC = () => {
             </button>
             <button 
               onClick={() => setFilter('dummy')}
-              className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${filter === 'dummy' ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'text-slate-400 hover:text-white'}`}
+              className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${filter === 'dummy' ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'hmo-text-muted hover:hmo-text-primary'}`}
             >
               Cleanup Needed
             </button>
@@ -264,11 +264,11 @@ const AdminDashboard: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="bg-hmo-card border border-hmo-border p-6 rounded-3xl group hover:border-slate-700 transition-all"
+              className="hmo-card border border-hmo-border p-6 rounded-3xl group dark:hover:border-slate-700 transition-all shadow-xl dark:shadow-none"
             >
               <div className={`mb-4 ${stat.color} group-hover:scale-110 transition-transform`}>{stat.icon}</div>
-              <p className="text-3xl font-bold text-white mb-1">{stat.value}</p>
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">{stat.label}</p>
+              <p className="text-3xl font-bold hmo-text-primary mb-1">{stat.value}</p>
+              <p className="text-xs font-bold hmo-text-muted uppercase tracking-widest">{stat.label}</p>
             </motion.div>
           ))}
         </div>
@@ -278,12 +278,12 @@ const AdminDashboard: React.FC = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-hmo-border bg-white/[0.02]">
-                  <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Public Identity</th>
-                  <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center">Auth Role</th>
-                  <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Enrollment</th>
-                  <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Listener Status</th>
-                  <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">Actions</th>
+                <tr className="border-b border-hmo-border bg-slate-50 dark:bg-white/[0.02]">
+                  <th className="px-6 py-4 text-[10px] font-bold hmo-text-muted uppercase tracking-widest">Public Identity</th>
+                  <th className="px-6 py-4 text-[10px] font-bold hmo-text-muted uppercase tracking-widest text-center">Auth Role</th>
+                  <th className="px-6 py-4 text-[10px] font-bold hmo-text-muted uppercase tracking-widest">Enrollment</th>
+                  <th className="px-6 py-4 text-[10px] font-bold hmo-text-muted uppercase tracking-widest">Listener Status</th>
+                  <th className="px-6 py-4 text-[10px] font-bold hmo-text-muted uppercase tracking-widest text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-hmo-border">
@@ -291,12 +291,12 @@ const AdminDashboard: React.FC = () => {
                   <tr>
                     <td colSpan={5} className="px-6 py-20 text-center">
                       <div className="inline-block w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
-                      <p className="text-slate-500 text-xs font-bold uppercase tracking-widest animate-pulse">Scanning Cloud Database...</p>
+                      <p className="hmo-text-muted text-xs font-bold uppercase tracking-widest animate-pulse">Scanning Cloud Database...</p>
                     </td>
                   </tr>
                 ) : filteredUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-20 text-center text-slate-500 text-sm">
+                    <td colSpan={5} className="px-6 py-20 text-center hmo-text-muted text-sm">
                       No records match the current criteria.
                     </td>
                   </tr>
@@ -305,12 +305,12 @@ const AdminDashboard: React.FC = () => {
                     <tr key={u.uid} className="hover:bg-white/[0.01] transition-colors group/row">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-4">
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold border ${u.role === 'listener' ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400' : 'bg-slate-800 border-hmo-border text-slate-400'} group-hover/row:border-primary/30 transition-colors`}>
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold border ${u.role === 'listener' ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400' : 'bg-slate-50 dark:bg-slate-800 border-hmo-border hmo-text-muted'} group-hover/row:border-primary/30 transition-colors`}>
                             {u.role === 'listener' ? <Headphones size={18} /> : (u.username?.[0]?.toUpperCase() || '?')}
                           </div>
                           <div>
-                            <p className="text-sm font-bold text-white">{u.username || 'Unset Account'}</p>
-                            <p className="text-[10px] text-slate-600 font-mono tracking-tighter uppercase">{u.uid}</p>
+                            <p className="text-sm font-bold hmo-text-primary">{u.username || 'Unset Account'}</p>
+                            <p className="text-[10px] hmo-text-muted font-mono tracking-tighter uppercase">{u.uid}</p>
                           </div>
                         </div>
                       </td>
@@ -320,8 +320,8 @@ const AdminDashboard: React.FC = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-2 text-slate-400 text-xs font-medium">
-                          <Clock size={12} className="text-slate-600" />
+                        <div className="flex items-center gap-2 hmo-text-muted text-xs font-medium">
+                          <Clock size={12} className="opacity-50" />
                           {u.createdAt?.toDate ? u.createdAt.toDate().toLocaleDateString() : 'N/A'}
                         </div>
                       </td>
@@ -397,10 +397,10 @@ const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Critical Implementation Warning */}
-        <div className="mt-8 flex items-start gap-4 p-5 bg-white/5 border border-white/10 rounded-2xl shadow-inner">
+        <div className="mt-8 flex items-start gap-4 p-5 bg-yellow-500/5 dark:bg-white/5 border border-yellow-500/10 dark:border-white/10 rounded-2xl shadow-inner">
           <AlertTriangle size={24} className="text-accent shrink-0 mt-0.5 animate-pulse" />
-          <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
-            <span className="text-white font-bold block mb-1">Architecture Limitation:</span> 
+          <p className="text-[11px] hmo-text-secondary leading-relaxed font-medium">
+            <span className="hmo-text-primary font-bold block mb-1">Architecture Limitation:</span> 
             Pure client-side operations cannot erase Firebase Authentication records. This interface purges the Firestore user document only. For complete user disposal, bridge this action to a Firebase Cloud Function using the <code className="text-accent bg-accent/5 px-1 rounded">firebase-admin</code> SDK.
           </p>
         </div>

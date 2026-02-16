@@ -151,8 +151,8 @@ const Feed: React.FC = () => {
               <ShieldAlert size={20} />
             </div>
             <div>
-              <h2 className="text-sm font-black text-white uppercase tracking-wider">Moderation Mode</h2>
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">You have administrative privileges in this feed.</p>
+              <h2 className="text-sm font-black hmo-text-primary uppercase tracking-wider">Moderation Mode</h2>
+              <p className="text-[10px] hmo-text-muted font-bold uppercase tracking-widest mt-0.5">You have administrative privileges in this feed.</p>
             </div>
           </div>
         )}
@@ -162,7 +162,7 @@ const Feed: React.FC = () => {
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
               <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-              <p className="text-slate-500 text-xs font-bold uppercase tracking-widest animate-pulse">Syncing Feed...</p>
+              <p className="hmo-text-muted text-xs font-bold uppercase tracking-widest animate-pulse">Syncing Feed...</p>
             </div>
           ) : posts.length > 0 ? (
             posts.map((post) => (
@@ -178,8 +178,8 @@ const Feed: React.FC = () => {
               />
             ))
           ) : (
-            <div className="text-center py-20 px-8 bg-hmo-card border border-dashed border-hmo-border rounded-[2.5rem]">
-              <p className="text-slate-500 text-base font-medium italic">
+            <div className="hmo-card border-dashed p-20 px-8 text-center">
+              <p className="hmo-text-secondary text-base font-medium italic">
                 {!user ? "Please log in to view the community." : "The community is quiet right now. Check back soon."}
               </p>
             </div>

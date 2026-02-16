@@ -233,23 +233,23 @@ const PostCard: React.FC<PostCardProps> = ({
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-hmo-card border border-hmo-border rounded-3xl p-6 sm:p-8 mb-6 hover:border-slate-700 transition-all group shadow-sm"
+      className="hmo-card p-6 sm:p-8 mb-6 dark:hover:border-slate-700 shadow-xl dark:shadow-none"
     >
       <div className="flex justify-between items-start mb-6">
         <Link to={`/profile/@${post.username}`} className="flex items-center gap-4 group/author">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-500/20 flex items-center justify-center text-indigo-400 font-black text-sm group-hover/author:scale-105 transition-transform shadow-inner">
+          <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/20 border border-indigo-500/20 flex items-center justify-center text-indigo-500 dark:text-indigo-400 font-black text-sm group-hover/author:scale-105 transition-transform shadow-inner">
             {post.username?.slice(0, 2).toUpperCase() || 'AN'}
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-base font-bold text-white group-hover/author:text-primary transition-colors">{post.username || 'Anonymous'}</h3>
+              <h3 className="text-base font-bold hmo-text-primary group-hover/author:text-primary transition-colors">{post.username || 'Anonymous'}</h3>
               {isAdmin && (
                 <ShieldAlert size={14} className="text-primary" aria-label="Administrator" />
               )}
             </div>
             <div className="flex items-center gap-2 mt-0.5">
-               <Clock size={12} className="text-slate-600" />
-               <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">{getRelativeTime(post.createdAt)}</p>
+               <Clock size={12} className="hmo-text-muted" />
+               <p className="text-[11px] font-bold hmo-text-muted uppercase tracking-wider">{getRelativeTime(post.createdAt)}</p>
             </div>
           </div>
         </Link>
@@ -268,39 +268,39 @@ const PostCard: React.FC<PostCardProps> = ({
         </div>
       </div>
       
-      <p className="text-slate-300 leading-relaxed mb-8 text-[15px] font-medium">
-        {post.content}
-      </p>
+       <p className="hmo-text-secondary leading-relaxed mb-8 text-[15px] font-medium">
+         {post.content}
+       </p>
 
       {/* Action Bar */}
       <div className="flex items-center gap-8 pt-6 border-t border-hmo-border/50">
         <button 
           onClick={handleToggleLike}
           disabled={likeLoading}
-          className={`flex items-center gap-2.5 transition-all text-sm font-bold active:scale-95 ${isLiked ? 'text-primary' : 'text-slate-500 hover:text-white'}`}
-        >
-          <Heart size={18} fill={isLiked ? "currentColor" : "none"} className={isLiked ? "animate-heartbeat" : ""} />
-          <span className="hidden sm:inline">Support</span>
-          {likesCount > 0 && <span className="text-[10px] bg-white/5 px-2 py-0.5 rounded-full">{likesCount}</span>}
+          className={`flex items-center gap-2.5 transition-all text-sm font-bold active:scale-95 ${isLiked ? 'text-primary' : 'hmo-text-secondary hover:hmo-text-primary'}`}
+       >
+         <Heart size={18} fill={isLiked ? "currentColor" : "none"} className={isLiked ? "animate-heartbeat" : ""} />
+         <span className="hidden sm:inline">Support</span>
+         {likesCount > 0 && <span className="text-[10px] bg-slate-100 dark:bg-white/5 hmo-text-primary px-2 py-0.5 rounded-full font-bold">{likesCount}</span>}
         </button>
 
         <button 
           onClick={() => onOpenComments(post)}
-          className="flex items-center gap-2.5 text-slate-500 hover:text-white transition-all text-sm font-bold active:scale-95"
-        >
-          <MessageCircle size={18} />
-          <span className="hidden sm:inline">Reply</span>
-          {post.commentCount && post.commentCount > 0 && <span className="text-[10px] bg-white/5 px-2 py-0.5 rounded-full">{post.commentCount}</span>}
+          className="flex items-center gap-2.5 hmo-text-secondary hover:hmo-text-primary transition-all text-sm font-bold active:scale-95"
+       >
+         <MessageCircle size={18} />
+         <span className="hidden sm:inline">Reply</span>
+         {post.commentCount && post.commentCount > 0 && <span className="text-[10px] bg-slate-100 dark:bg-white/5 hmo-text-primary px-2 py-0.5 rounded-full font-bold">{post.commentCount}</span>}
         </button>
 
         {!isSelf && !isFriend && (
           <button 
             onClick={() => requestSent ? onCancelFriendRequest?.(post.authorId) : onSendFriendRequest?.(post.authorId)}
             disabled={requesting}
-            className={`ml-auto flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${requestSent ? 'bg-primary/10 text-primary' : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white'}`}
-          >
-            {requestSent ? <Clock size={14} /> : <UserPlus size={14} />}
-            {requestSent ? 'Pending' : 'Add Friend'}
+             className={`ml-auto flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${requestSent ? 'bg-primary/10 text-primary' : 'hmo-button-ghost'}`}
+           >
+             {requestSent ? <Clock size={14} /> : <UserPlus size={14} />}
+             {requestSent ? 'Pending' : 'Add Friend'}
           </button>
         )}
 

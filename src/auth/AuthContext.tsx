@@ -66,6 +66,9 @@ interface User {
   friendRequestsReceived: string[]; // Deprecated
   emailVerified: boolean;
   isAnonymous: boolean;
+  preferences?: {
+    theme: 'light' | 'dark';
+  };
 }
 
 /** Represents a pending friend connection between two users. */
@@ -191,7 +194,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isPremium: false,
         friends: [],
         friendRequestsSent: [],
-        friendRequestsReceived: []
+        friendRequestsReceived: [],
+        preferences: {
+          theme: 'dark'
+        }
       };
 
       try {
@@ -341,7 +347,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           friendRequestsSent: [],
           friendRequestsReceived: [],
           emailVerified: false,
-          isAnonymous: false
+          isAnonymous: false,
+          preferences: {
+            theme: 'dark'
+          }
         };
         
         console.log("[Signup] Initializing Firestore documents...");

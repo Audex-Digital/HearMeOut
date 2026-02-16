@@ -7,27 +7,72 @@
 
 
 :root {
-  /* Legacy names for backward compatibility with component CSS files */
-  --bg-dark: #05070a;
-  --bg-card: #0d1117;
+  /* Common variables */
   --primary: #6366f1;
   --primary-glow: rgba(99, 102, 241, 0.4);
   --accent: #818cf8;
-  --text-primary: #ffffff;
-  --text-secondary: #94a3b8;
-  --glass: rgba(255, 255, 255, 0.03);
-  --glass-border: rgba(255, 255, 255, 0.1);
   --font-main: 'Outfit', sans-serif;
 
-  /* Modern internal names */
+  /* Light Theme (Default) */
+  --bg-dark: #f8fafc;
+  --bg-card: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --glass: rgba(0, 0, 0, 0.03);
+  --glass-border: rgba(0, 0, 0, 0.1);
+  --hmo-dark: #f8fafc;
+  --hmo-card: #ffffff;
+  --hmo-border: rgba(0, 0, 0, 0.1);
+  --nav-bg: rgba(248, 250, 252, 0.8);
+  --button-ghost: rgba(0, 0, 0, 0.05);
+  --button-ghost-hover: rgba(0, 0, 0, 0.08);
+}
+
+/* Dark Theme */
+.dark {
+  --bg-dark: #05070a;
+  --bg-card: #0d1117;
+  --text-primary: #ffffff;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --glass: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.1);
   --hmo-dark: #05070a;
   --hmo-card: #0d1117;
   --hmo-border: rgba(255, 255, 255, 0.1);
+  --nav-bg: rgba(5, 7, 10, 0.8);
+  --button-ghost: rgba(255, 255, 255, 0.05);
+  --button-ghost-hover: rgba(255, 255, 255, 0.1);
 }
 
 html {
   scroll-behavior: smooth;
   background-color: var(--hmo-dark);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+@layer components {
+  .hmo-card {
+    @apply bg-hmo-card border border-hmo-border rounded-3xl transition-all duration-300;
+  }
+  
+  .hmo-text-primary {
+    @apply text-slate-900 dark:text-white transition-colors duration-300;
+  }
+
+  .hmo-text-secondary {
+    @apply text-slate-600 dark:text-slate-400 transition-colors duration-300;
+  }
+
+  .hmo-text-muted {
+    @apply text-slate-400 dark:text-slate-600 transition-colors duration-300;
+  }
+
+  .hmo-button-ghost {
+    @apply bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white transition-all duration-300;
+  }
 }
 
 * {

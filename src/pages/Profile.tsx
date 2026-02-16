@@ -101,7 +101,7 @@ const Profile: React.FC = () => {
       <LoggedLayout>
         <div className="flex flex-col items-center justify-center py-20 gap-4">
           <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-slate-500 text-sm font-medium">Syncing profile...</p>
+          <p className="hmo-text-muted text-sm font-medium">Syncing profile...</p>
         </div>
       </LoggedLayout>
     );
@@ -115,20 +115,20 @@ const Profile: React.FC = () => {
         <motion.div 
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-hmo-card border border-hmo-border rounded-[2.5rem] p-8 sm:p-12 text-center shadow-2xl overflow-hidden relative"
+          className="hmo-card p-8 sm:p-12 text-center shadow-2xl dark:shadow-none overflow-hidden relative"
         >
           {/* Main Profile Info */}
           <div className="flex flex-col items-center mb-10">
-            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-[#1a1c2e] border border-hmo-border flex items-center justify-center text-primary mb-6 shadow-glow">
+            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-slate-50 dark:bg-[#1a1c2e] border border-hmo-border flex items-center justify-center text-primary mb-6 shadow-sm dark:shadow-glow">
               <UserIcon size={48} className="opacity-80" />
             </div>
             
-            <h1 className="text-2xl sm:text-3xl font-black text-white mb-2 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black hmo-text-primary mb-2 tracking-tight">
               @{user.username || 'AnonymousUser'}
             </h1>
             
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 text-slate-500 text-xs font-bold uppercase tracking-wider">
+              <div className="flex items-center gap-2 hmo-text-muted text-xs font-bold uppercase tracking-wider">
                 <Calendar size={14} />
                 Member since {user.memberSince || 'February 2026'}
               </div>
@@ -149,11 +149,11 @@ const Profile: React.FC = () => {
 
           {/* About Section */}
           <div className="mb-10 relative">
-            <div className="absolute -top-3 left-6 px-3 bg-hmo-card text-[10px] font-black text-slate-500 uppercase tracking-widest z-10">
+            <div className="absolute -top-3 left-6 px-3 bg-slate-50 dark:bg-hmo-card hmo-text-muted text-[10px] font-black uppercase tracking-widest z-10">
               About
             </div>
-            <div className="bg-[#05070a]/50 border border-hmo-border rounded-3xl p-8 italic">
-              <p className="text-slate-300 text-sm leading-relaxed">
+            <div className="bg-slate-50 dark:bg-[#05070a]/50 border border-hmo-border rounded-3xl p-8 italic">
+              <p className="hmo-text-secondary text-sm leading-relaxed">
                 "{user.bio || "No bio yet. Just listening..."}"
               </p>
             </div>
@@ -189,8 +189,8 @@ const Profile: React.FC = () => {
             <div className="mb-10 p-6 bg-indigo-500/5 border border-indigo-500/10 rounded-3xl">
               <div className="flex items-center justify-between">
                 <div className="text-left">
-                  <h3 className="text-sm font-black text-white uppercase tracking-wider">Active Status</h3>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">
+                  <h3 className="text-sm font-black hmo-text-primary uppercase tracking-wider">Active Status</h3>
+                  <p className="text-[10px] hmo-text-muted font-bold uppercase tracking-widest mt-0.5">
                     {user.listenerActive ? 'Visible to users seeking help' : 'Currently offline'}
                   </p>
                 </div>
@@ -209,7 +209,7 @@ const Profile: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <button 
                 onClick={() => navigate('/edit-profile')}
-                className="flex items-center justify-center gap-2 py-4 bg-white/5 border border-hmo-border rounded-2xl text-sm font-bold text-white hover:bg-white/10 transition-all active:scale-95"
+                className="flex items-center justify-center gap-2 py-4 hmo-button-ghost rounded-2xl text-sm font-bold active:scale-95"
               >
                 <Edit3 size={18} />
                 Edit Profile
@@ -248,17 +248,17 @@ const Profile: React.FC = () => {
                 exit={{ opacity: 0, height: 0 }}
                 className="overflow-hidden mb-6"
               >
-                <div className="bg-[#05070a]/50 border border-hmo-border rounded-3xl p-6 text-left">
-                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Pending Requests</h3>
+                <div className="bg-slate-50 dark:bg-[#05070a]/50 border border-hmo-border rounded-3xl p-6 text-left">
+                  <h3 className="text-xs font-bold hmo-text-muted uppercase tracking-widest mb-4">Pending Requests</h3>
                   <div className="space-y-3">
                     {loadingRequests ? (
                       <p className="text-xs text-slate-600 animate-pulse">Scanning...</p>
                     ) : requestSenders.length === 0 ? (
-                      <p className="text-xs text-slate-600 italic">No pending connections.</p>
+                      <p className="text-xs hmo-text-muted italic">No pending connections.</p>
                     ) : (
                       requestSenders.map(sender => (
                         <div key={sender.uid} className="flex items-center justify-between p-3 bg-hmo-card border border-hmo-border rounded-xl">
-                          <span className="text-sm font-bold text-white">@{sender.username}</span>
+                          <span className="text-sm font-bold hmo-text-primary">@{sender.username}</span>
                           <div className="flex gap-2">
                             <button onClick={() => acceptFriendRequest(sender.uid)} className="p-2 text-green-500 hover:bg-green-500/10 rounded-lg transition-colors"><Check size={16} /></button>
                             <button onClick={() => rejectFriendRequest(sender.uid)} className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"><X size={16} /></button>
@@ -272,7 +272,7 @@ const Profile: React.FC = () => {
             )}
           </AnimatePresence>
 
-          <p className="text-[10px] font-medium text-slate-600 tracking-wide uppercase">
+          <p className="text-[10px] font-medium hmo-text-muted tracking-wide uppercase">
             This profile is anonymous. Your real identity is never revealed.
           </p>
         </motion.div>

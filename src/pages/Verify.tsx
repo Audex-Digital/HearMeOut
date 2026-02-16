@@ -100,8 +100,8 @@ const Verify: React.FC = () => {
           <div className="w-20 h-20 bg-gradient-to-tr from-accent to-primary rounded-3xl mx-auto mb-6 flex items-center justify-center shadow-lg shadow-accent/20">
             <Mail className="text-white" size={40} />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-3 leading-tight tracking-tight">Verify Your Email</h1>
-          <p className="text-slate-400 text-sm font-medium leading-relaxed">
+          <h1 className="text-3xl font-bold hmo-text-primary mb-3 leading-tight tracking-tight">Verify Your Email</h1>
+          <p className="hmo-text-secondary text-sm font-medium leading-relaxed">
             Check your email inbox at <span className="text-primary font-bold">{user?.email}</span> and click the verification link to activate your account.
           </p>
         </header>
@@ -127,7 +127,7 @@ const Verify: React.FC = () => {
           <button
             onClick={handleResendEmail}
             disabled={checking || resending}
-            className="w-full text-slate-500 hover:text-white py-2 font-bold text-xs uppercase tracking-widest transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full hmo-text-muted hover:hmo-text-primary py-2 font-bold text-xs uppercase tracking-widest transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {resending ? (
               <Loader2 className="animate-spin" size={14} />
@@ -141,7 +141,7 @@ const Verify: React.FC = () => {
         </div>
 
         <footer className="mt-10 pt-8 border-t border-hmo-border/50">
-          <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest leading-relaxed">
+          <p className="hmo-text-muted text-[10px] font-black uppercase tracking-widest leading-relaxed">
             Can't find it? Check your spam folder or wait a few minutes before resending.
           </p>
         </footer>

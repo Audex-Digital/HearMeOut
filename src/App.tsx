@@ -39,6 +39,7 @@ import ResetPassword from './pages/ResetPassword';
 
 import NotificationSystem from './components/Notifications/NotificationSystem';
 import { Toaster } from 'react-hot-toast';
+import { ThemeProvider } from './context/ThemeContext';
 
 interface RouteProps {
   children: React.ReactNode;
@@ -52,7 +53,7 @@ const ProtectedRoute: React.FC<RouteProps> = ({ children }) => {
   const { user, loading } = useAuth();
 
   if (loading) return (
-    <div className="min-h-screen bg-hmo-dark flex items-center justify-center">
+    <div className="min-h-screen bg-bg-dark flex items-center justify-center">
       <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
     </div>
   );
@@ -70,7 +71,7 @@ const AdminRoute: React.FC<RouteProps> = ({ children }) => {
   const { user, isAdmin, loading } = useAuth();
 
   if (loading) return (
-    <div className="min-h-screen bg-hmo-dark flex items-center justify-center">
+    <div className="min-h-screen bg-bg-dark flex items-center justify-center">
       <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
     </div>
   );
@@ -101,16 +102,16 @@ const AppContent: React.FC = () => {
   const { user } = useAuth();
 
   return (
-    <div className="bg-hmo-dark min-h-screen text-slate-200 selection:bg-primary/30">
+    <div className="bg-slate-50 dark:bg-hmo-dark min-h-screen text-slate-900 dark:text-white selection:bg-primary/30 transition-colors duration-300">
       {/* Global UI Overlays */}
       <Toaster
         position="bottom-right"
         toastOptions={{
           duration: 5000,
           style: {
-            background: '#1e293b',
-            color: '#fff',
-            border: '1px solid rgba(255,255,255,0.1)'
+            background: 'var(--bg-card)',
+            color: 'var(--text-primary)',
+            border: '1px solid var(--glass-border)'
           }
         }}
       />
@@ -165,7 +166,9 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <AppContent />
+        <ThemeProvider>
+          <AppContent />
+        </ThemeProvider>
       </AuthProvider>
     </Router>
   );

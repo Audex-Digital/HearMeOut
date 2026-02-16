@@ -184,10 +184,10 @@ const UserProfile: React.FC = () => {
   // Loading State
   if (loading) {
     return (
-      <div className="pt-28 pb-10 min-h-screen bg-hmo-dark flex items-center justify-center">
+      <div className="pt-28 pb-10 min-h-screen bg-hmo-dark flex items-center justify-center transition-colors duration-300">
         <div className="flex flex-col items-center gap-4 text-center">
           <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-slate-500 text-sm font-bold uppercase tracking-widest">Scanning Identity...</p>
+          <p className="hmo-text-muted text-sm font-bold uppercase tracking-widest">Scanning Identity...</p>
         </div>
       </div>
     );
@@ -196,13 +196,13 @@ const UserProfile: React.FC = () => {
   // Not Found State
   if (!targetUser) {
     return (
-      <div className="pt-28 pb-10 min-h-screen bg-hmo-dark flex items-center justify-center">
+      <div className="pt-28 pb-10 min-h-screen bg-hmo-dark flex items-center justify-center transition-colors duration-300">
         <div className="max-w-md w-full px-6 text-center">
-          <div className="w-20 h-20 bg-white/5 border border-hmo-border rounded-3xl mx-auto mb-8 flex items-center justify-center text-slate-600">
+          <div className="w-20 h-20 bg-slate-50 dark:bg-white/5 border border-hmo-border rounded-3xl mx-auto mb-8 flex items-center justify-center hmo-text-muted">
             <UserX size={40} />
           </div>
-          <h1 className="text-2xl font-bold text-white mb-2">User Not Found</h1>
-          <p className="text-slate-500 text-sm mb-8 leading-relaxed">The profile you are looking for might have been removed or never existed.</p>
+          <h1 className="text-2xl font-bold hmo-text-primary mb-2">User Not Found</h1>
+          <p className="hmo-text-secondary text-sm mb-8 leading-relaxed">The profile you are looking for might have been removed or never existed.</p>
           <button 
             onClick={() => navigate('/feed')}
             className="flex items-center justify-center gap-2 w-full py-4 bg-primary text-white rounded-2xl font-bold hover:shadow-lg hover:shadow-primary/20 transition-all"
@@ -216,12 +216,12 @@ const UserProfile: React.FC = () => {
   }
 
   return (
-    <div className="pt-28 pb-10 min-h-screen bg-hmo-dark">
+    <div className="pt-28 pb-10 min-h-screen bg-hmo-dark transition-colors duration-300">
       <div className="container mx-auto px-4 max-w-2xl">
         {/* Navigation Back */}
         <button 
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-slate-500 hover:text-white transition-colors mb-6 text-[10px] font-bold uppercase tracking-widest"
+          className="flex items-center gap-2 hmo-text-muted hover:hmo-text-primary transition-colors mb-6 text-[10px] font-bold uppercase tracking-widest"
         >
           <ArrowLeft size={16} />
           Back
@@ -230,7 +230,7 @@ const UserProfile: React.FC = () => {
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-hmo-card border border-hmo-border rounded-3xl overflow-hidden shadow-2xl"
+          className="hmo-card overflow-hidden shadow-2xl dark:shadow-none"
         >
           {/* Cover Header */}
           <div className="h-32 bg-gradient-to-r from-primary/10 to-accent/10 relative">
@@ -253,19 +253,19 @@ const UserProfile: React.FC = () => {
             {/* Profile Info & Actions Bar */}
             <div className="pt-16 flex flex-col sm:flex-row justify-between items-start gap-6 mb-8">
               <div>
-                <div className="flex items-center gap-3 mb-2 text-white">
+                <div className="flex items-center gap-3 mb-2 hmo-text-primary">
                   <h1 className="text-2xl font-bold">@{targetUser.username}</h1>
                   {targetUser.isAnonymous && (
                     <span className="px-2 py-0.5 bg-accent/20 border border-accent/20 rounded-md text-[9px] font-black uppercase text-accent">Guest</span>
                   )}
                 </div>
-                <div className="flex items-center gap-4 text-slate-500 text-xs font-semibold">
+                <div className="flex items-center gap-4 hmo-text-muted text-xs font-semibold">
                   <p className="flex items-center gap-1.5 uppercase tracking-tighter">
-                    <Calendar size={14} className="text-slate-600" />
+                    <Calendar size={14} className="hmo-text-muted opacity-70" />
                     Joined {targetUser.memberSince}
                   </p>
                   <p className="flex items-center gap-1.5 uppercase tracking-tighter">
-                    <Shield size={14} className="text-slate-600" />
+                    <Shield size={14} className="hmo-text-muted opacity-70" />
                     Secure Identity
                   </p>
                 </div>
@@ -276,7 +276,7 @@ const UserProfile: React.FC = () => {
                 {socialState === 'self' ? (
                   <Link 
                     to="/edit-profile"
-                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-white/5 border border-hmo-border rounded-xl text-xs font-bold text-white hover:bg-white/10 transition-all"
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 hmo-button-ghost"
                   >
                     Edit My Bio
                   </Link>
@@ -292,7 +292,7 @@ const UserProfile: React.FC = () => {
                     <button 
                       onClick={handleDisconnect}
                       disabled={socialLoading}
-                      className="p-3 bg-white/5 border border-hmo-border text-slate-500 hover:text-red-500 rounded-xl transition-all"
+                      className="p-3 bg-slate-50 dark:bg-white/5 border border-hmo-border hmo-text-muted hover:text-red-500 rounded-xl transition-all"
                     >
                       <UserMinus size={18} />
                     </button>
@@ -301,7 +301,7 @@ const UserProfile: React.FC = () => {
                   <button 
                     onClick={handleCancelRequest}
                     disabled={socialLoading}
-                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-white/10 border border-hmo-border text-slate-400 rounded-xl text-xs font-bold transition-all hover:text-red-500 hover:border-red-500/30 group"
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-slate-50 dark:bg-white/10 border border-hmo-border hmo-text-muted rounded-xl text-xs font-bold transition-all hover:text-red-500 hover:border-red-500/30 group"
                   >
                     <Clock size={16} className="group-hover:hidden" />
                     <span className="group-hover:hidden">Pending...</span>
@@ -329,30 +329,30 @@ const UserProfile: React.FC = () => {
             </div>
 
             {/* Bio Card */}
-            <div className="p-6 bg-white/[0.03] border border-hmo-border rounded-2xl mb-8">
-              <h3 className="text-[10px] font-bold text-slate-600 uppercase tracking-widest mb-3">About the Explorer</h3>
-              <p className="text-slate-300 leading-relaxed text-sm">
+            <div className="p-6 bg-slate-50 dark:bg-white/[0.03] border border-hmo-border rounded-2xl mb-8">
+              <h3 className="text-[10px] font-bold hmo-text-muted uppercase tracking-widest mb-3">About the Explorer</h3>
+              <p className="hmo-text-secondary leading-relaxed text-sm">
                 {targetUser.bio || "This explorer prefers to let their thoughts speak for them. (No bio provided)"}
               </p>
             </div>
 
             {/* Statistics Bar */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 bg-white/5 border border-hmo-border rounded-2xl text-center">
-                <p className="text-xl font-bold text-white mb-0.5">{friendCount}</p>
-                <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">Safe Connections</p>
+              <div className="p-4 bg-slate-50 dark:bg-white/5 border border-hmo-border rounded-2xl text-center">
+                <p className="text-xl font-bold hmo-text-primary mb-0.5">{friendCount}</p>
+                <p className="text-[9px] font-bold hmo-text-muted uppercase tracking-widest">Safe Connections</p>
               </div>
-              <div className="p-4 bg-white/5 border border-hmo-border rounded-2xl text-center">
-                <p className="text-xl font-bold text-white mb-0.5">Active</p>
-                <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">Community Status</p>
+              <div className="p-4 bg-slate-50 dark:bg-white/5 border border-hmo-border rounded-2xl text-center">
+                <p className="text-xl font-bold hmo-text-primary mb-0.5">Active</p>
+                <p className="text-[9px] font-bold hmo-text-muted uppercase tracking-widest">Community Status</p>
               </div>
             </div>
 
             {/* Footer Privacy Disclaimer */}
             <div className="mt-8 flex items-center gap-3 p-4 bg-primary/5 border border-primary/10 rounded-xl">
               <Shield size={18} className="text-primary shrink-0" />
-              <p className="text-[10px] text-slate-500 leading-relaxed">
-                <span className="text-white font-bold">Privacy First.</span> All user interactions on HearMeOut are encrypted and anonymized. 
+              <p className="text-[10px] hmo-text-secondary leading-relaxed">
+                <span className="hmo-text-primary font-bold">Privacy First.</span> All user interactions on HearMeOut are encrypted and anonymized. 
                 We never store personal identifiers linked to public handles.
               </p>
             </div>

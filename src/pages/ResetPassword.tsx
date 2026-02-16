@@ -83,7 +83,7 @@ const ResetPassword: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-hmo-dark flex items-center justify-center p-6 relative overflow-hidden">
+        <div className="min-h-screen bg-hmo-dark flex items-center justify-center p-6 relative overflow-hidden transition-colors duration-300">
             {/* Decorative Blur Orbs - Consistent with Login */}
             <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[120px] animate-pulse-slow"></div>
             <div className="absolute bottom-[-10%] left-[-10%] w-[30%] h-[30%] bg-accent/20 rounded-full blur-[100px] animate-pulse-slow"></div>
@@ -91,16 +91,16 @@ const ResetPassword: React.FC = () => {
             <motion.div
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                className="w-full max-w-md bg-hmo-card border border-hmo-border rounded-[2.5rem] p-8 sm:p-12 shadow-2xl relative z-10"
+                className="hmo-card w-full max-w-md p-8 sm:p-12 shadow-2xl dark:shadow-none"
             >
                 <header className="text-center mb-10">
                     <div className="w-16 h-16 bg-gradient-to-tr from-primary to-accent rounded-3xl mx-auto mb-6 flex items-center justify-center shadow-lg shadow-primary/20 transform rotate-3">
                         {emailSent ? <CircleCheckBig className="text-white" size={32} /> : <KeyRound className="text-white" size={32} />}
                     </div>
-                    <h1 className="text-3xl font-bold text-white mb-2 leading-tight">
+                    <h1 className="text-3xl font-bold hmo-text-primary mb-2 leading-tight">
                         {emailSent ? "Check your mail" : "Reset Password"}
                     </h1>
-                    <p className="text-slate-500 text-sm font-medium tracking-wide">
+                    <p className="hmo-text-secondary text-sm font-medium tracking-wide">
                         {emailSent
                             ? "We have sent a password recover instruction to your email."
                             : "Enter your email and we'll send you a link to reset your password."}
@@ -110,15 +110,15 @@ const ResetPassword: React.FC = () => {
                 {!emailSent ? (
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="space-y-2">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Email Address</label>
+                            <label className="text-[10px] font-bold hmo-text-muted uppercase tracking-widest ml-1">Email Address</label>
                             <div className="relative group">
-                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary transition-colors" size={20} />
+                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 hmo-text-muted group-focus-within:text-primary transition-colors" size={20} />
                                 <input
                                     type="email"
                                     value={email}
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                                     placeholder="yours@example.com"
-                                    className="w-full bg-hmo-dark border border-hmo-border rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all text-sm font-medium"
+                                    className="w-full bg-slate-50 dark:bg-hmo-dark border border-hmo-border rounded-2xl py-4 pl-12 pr-4 hmo-text-primary focus:outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all text-sm font-medium"
                                     disabled={loading}
                                 />
                             </div>
@@ -135,8 +135,8 @@ const ResetPassword: React.FC = () => {
                     </form>
                 ) : (
                     <div className="space-y-6">
-                        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
-                            <p className="text-slate-300 text-sm">
+                        <div className="bg-slate-50 dark:bg-white/5 border border-hmo-border rounded-2xl p-4 text-center">
+                            <p className="hmo-text-secondary text-sm">
                                 Did not receive the email? Check your spam filter, or waiting for a few minutes.
                             </p>
                         </div>
@@ -145,7 +145,7 @@ const ResetPassword: React.FC = () => {
                                 setEmailSent(false);
                                 setEmail('');
                             }}
-                            className="w-full bg-hmo-dark border border-hmo-border text-slate-300 hover:text-white rounded-2xl py-4 font-bold text-sm transition-all"
+                            className="w-full hmo-button-ghost py-4 flex items-center justify-center gap-2 group disabled:opacity-50"
                         >
                             Try another email address
                         </button>
@@ -153,7 +153,7 @@ const ResetPassword: React.FC = () => {
                 )}
 
                 <footer className="mt-10 text-center">
-                    <Link to="/login" className="inline-flex items-center text-slate-500 text-sm font-medium hover:text-primary transition-colors gap-2 group">
+                    <Link to="/login" className="inline-flex items-center hmo-text-muted text-sm font-medium hover:text-primary transition-colors gap-2 group">
                         <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                         Back to Login
                     </Link>

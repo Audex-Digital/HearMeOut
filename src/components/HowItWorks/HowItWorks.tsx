@@ -32,7 +32,7 @@ const HowItWorks: React.FC = () => {
   ];
 
   return (
-    <section id="how-it-works" className="py-20 sm:py-32 bg-hmo-dark overflow-hidden">
+    <section id="how-it-works" className="py-20 sm:py-32 bg-hmo-dark overflow-hidden transition-colors duration-300">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="max-w-3xl mx-auto text-center mb-16 sm:mb-20">
           <motion.span 
@@ -48,7 +48,7 @@ const HowItWorks: React.FC = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-6 sm:mb-8"
+            className="text-3xl sm:text-4xl md:text-5xl font-bold hmo-text-primary mb-6 sm:mb-8"
           >
             Simple, Safe, and Supportive
           </motion.h2>
@@ -57,7 +57,7 @@ const HowItWorks: React.FC = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-lg sm:text-xl text-slate-400 leading-relaxed"
+            className="text-lg sm:text-xl hmo-text-secondary leading-relaxed"
           >
             We've stripped away the complexity of modern social networks to bring you back to what matters: human connection.
           </motion.p>
@@ -67,7 +67,7 @@ const HowItWorks: React.FC = () => {
           {steps.map((step, index) => (
             <motion.div 
               key={index}
-              className="bg-white/[0.02] border border-hmo-border p-8 rounded-3xl hover:bg-white/[0.04] transition-all hover:translate-y-[-5px] group flex flex-col items-center sm:items-start text-center sm:text-left"
+               className="hmo-card p-8 hover:bg-slate-100 dark:hover:bg-white/[0.04] flex flex-col items-center sm:items-start text-center sm:text-left shadow-sm dark:shadow-none"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -79,8 +79,8 @@ const HowItWorks: React.FC = () => {
               >
                 {step.icon}
               </div>
-              <h3 className="text-xl font-bold text-white mb-4">{step.title}</h3>
-              <p className="text-slate-400 leading-relaxed text-sm sm:text-base mb-2">{step.description}</p>
+               <h3 className="text-xl font-bold hmo-text-primary mb-4">{step.title}</h3>
+               <p className="hmo-text-secondary leading-relaxed text-sm sm:text-base mb-2">{step.description}</p>
             </motion.div>
           ))}
         </div>

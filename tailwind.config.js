@@ -9,17 +9,17 @@ export default {
     extend: {
       colors: {
         hmo: {
-          dark: '#05070a',
-          card: '#0d1117',
-          border: 'rgba(255, 255, 255, 0.1)',
-          primary: '#6366f1',
-          accent: '#818cf8',
+          dark: 'var(--hmo-dark)',
+          card: 'var(--hmo-card)',
+          border: 'var(--hmo-border)',
+          primary: 'var(--primary)',
+          accent: 'var(--accent)',
         },
         primary: {
-          DEFAULT: '#6366f1',
-          glow: 'rgba(99, 102, 241, 0.4)',
+          DEFAULT: 'var(--primary)',
+          glow: 'var(--primary-glow)',
         },
-        accent: '#818cf8',
+        accent: 'var(--accent)',
       },
     },
   },

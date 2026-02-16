@@ -256,19 +256,19 @@ const Chat: React.FC = () => {
       <div className="max-w-2xl mx-auto h-[75vh] flex flex-col bg-hmo-card border border-hmo-border rounded-[2.5rem] overflow-hidden shadow-2xl relative">
         
         {/* Chat Header */}
-        <div className="px-6 py-5 bg-white/[0.02] border-b border-hmo-border flex items-center justify-between">
+        <div className="px-6 py-5 bg-slate-50 dark:bg-white/[0.02] border-b border-hmo-border flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button onClick={() => navigate(-1)} className="p-2 -ml-2 text-slate-500 hover:text-white transition-colors">
+            <button onClick={() => navigate(-1)} className="p-2 -ml-2 hmo-text-muted hover:hmo-text-primary transition-colors">
               <ChevronLeft size={20} />
             </button>
             <div className="relative">
-              <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center font-bold text-slate-400 border border-hmo-border">
+              <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center font-bold hmo-text-muted border border-hmo-border">
                 {otherUser?.username?.[0]?.toUpperCase() || '?'}
               </div>
               <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-hmo-card rounded-full" />
             </div>
             <div>
-              <p className="text-sm font-black text-white">@{otherUser?.username || 'Loading...'}</p>
+              <p className="text-sm font-black hmo-text-primary">@{otherUser?.username || 'Loading...'}</p>
               <div className="flex items-center gap-1.5 mt-0.5">
                 {isEvaluation ? (
                   <span className="text-[9px] font-black text-yellow-500 uppercase tracking-widest flex items-center gap-1">
@@ -301,8 +301,8 @@ const Chat: React.FC = () => {
               <div className="w-16 h-16 bg-primary/5 rounded-3xl flex items-center justify-center text-primary/30 mb-4">
                 <MessageSquare size={32} />
               </div>
-              <p className="text-slate-500 text-xs font-bold uppercase tracking-[0.2em] mb-2">Safe Space Established</p>
-              <p className="text-slate-600 text-[10px] leading-relaxed max-w-[200px] italic">
+              <p className="hmo-text-muted text-xs font-bold uppercase tracking-[0.2em] mb-2">Safe Space Established</p>
+              <p className="hmo-text-secondary text-[10px] leading-relaxed max-w-[200px] italic font-medium">
                 {isEvaluation 
                   ? "Admins: Please use this space to evaluate the listener applicant's suitability." 
                   : "Every word shared here is protected by our peer support guidelines."}
@@ -321,10 +321,10 @@ const Chat: React.FC = () => {
                   <div className={`max-w-[85%] px-5 py-3 rounded-2xl text-sm leading-relaxed ${
                     isMine 
                     ? 'bg-primary text-white font-medium rounded-tr-none shadow-lg shadow-primary/10' 
-                    : 'bg-white/5 border border-hmo-border text-slate-200 rounded-tl-none font-medium'
+                    : 'bg-slate-50 dark:bg-white/5 border border-hmo-border hmo-text-primary rounded-tl-none font-medium shadow-sm dark:shadow-none'
                   }`}>
                     {msg.text}
-                    <div className={`text-[8px] mt-1.5 uppercase font-black tracking-tighter ${isMine ? 'text-white/40' : 'text-slate-600'}`}>
+                    <div className={`text-[8px] mt-1.5 uppercase font-black tracking-tighter ${isMine ? 'text-white/40' : 'hmo-text-muted opacity-60'}`}>
                       {msg.createdAt?.toDate ? msg.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Syncing...'}
                     </div>
                   </div>
@@ -344,7 +344,7 @@ const Chat: React.FC = () => {
                 placeholder="Type your message..."
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                className="flex-1 bg-[#05070a] border border-hmo-border rounded-2xl pl-6 pr-14 py-4 text-white placeholder:text-slate-700 focus:outline-none focus:border-primary transition-all shadow-inner"
+                className="flex-1 bg-slate-50 dark:bg-[#05070a] border border-hmo-border rounded-2xl pl-6 pr-14 py-4 hmo-text-primary placeholder:hmo-text-muted focus:outline-none focus:border-primary transition-all shadow-inner"
               />
               <button 
                 type="submit"

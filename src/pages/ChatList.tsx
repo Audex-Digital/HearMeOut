@@ -71,15 +71,15 @@ const ChatList: React.FC = () => {
         {/* Header */}
         <div className="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div>
-            <h1 className="text-3xl font-black text-white mb-2 tracking-tighter flex items-center gap-3">
+            <h1 className="text-3xl font-black hmo-text-primary mb-2 tracking-tighter flex items-center gap-3">
               <MessageSquare size={32} className="text-primary" />
               Incoming Messages
             </h1>
-            <p className="text-slate-500 font-medium italic">Your private encrypted conversations.</p>
+            <p className="hmo-text-secondary font-medium italic">Your private encrypted conversations.</p>
           </div>
-          <div className="px-5 py-2.5 bg-white/5 border border-hmo-border rounded-2xl flex items-center gap-3">
+          <div className="px-5 py-2.5 bg-slate-50 dark:bg-white/5 border border-hmo-border rounded-2xl flex items-center gap-3">
             <Shield size={16} className="text-primary" />
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">End-to-End Encrypted</span>
+            <span className="text-[10px] font-black hmo-text-muted uppercase tracking-widest">End-to-End Encrypted</span>
           </div>
         </div>
 
@@ -91,7 +91,7 @@ const ChatList: React.FC = () => {
             placeholder="Search conversations..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-14 pr-6 py-4 bg-hmo-card border border-hmo-border rounded-[1.5rem] text-white placeholder:text-slate-700 focus:outline-none focus:border-primary/50 transition-all shadow-inner"
+            className="w-full pl-14 pr-6 py-4 hmo-card border border-hmo-border rounded-[1.5rem] hmo-text-primary placeholder:hmo-text-muted focus:outline-none focus:border-primary/50 transition-all shadow-inner"
           />
         </div>
 
@@ -99,14 +99,14 @@ const ChatList: React.FC = () => {
         <div className="space-y-3">
           {loading ? (
             [1, 2, 3].map(i => (
-              <div key={i} className="h-24 bg-hmo-card/50 border border-hmo-border rounded-[2rem] animate-pulse" />
+              <div key={i} className="h-24 hmo-card border border-hmo-border rounded-[2rem] animate-pulse shadow-sm" />
             ))
           ) : filteredChats.length === 0 ? (
-            <div className="py-20 text-center bg-hmo-card border border-hmo-border rounded-[2.5rem] border-dashed">
-              <div className="w-16 h-16 bg-white/5 rounded-3xl flex items-center justify-center mx-auto mb-6 text-slate-700">
+            <div className="py-20 text-center hmo-card border border-hmo-border rounded-[2.5rem] border-dashed">
+              <div className="w-16 h-16 bg-slate-50 dark:bg-white/5 rounded-3xl flex items-center justify-center mx-auto mb-6 hmo-text-muted opacity-30">
                 <MessageSquare size={32} />
               </div>
-              <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">No active conversations found.</p>
+              <p className="hmo-text-muted font-bold uppercase tracking-widest text-xs">No active conversations found.</p>
               <button 
                 onClick={() => navigate('/feed')}
                 className="mt-6 text-primary text-xs font-black uppercase tracking-tighter hover:underline"
@@ -128,11 +128,11 @@ const ChatList: React.FC = () => {
                   animate={{ opacity: 1, y: 0 }}
                   whileHover={{ x: 4 }}
                   onClick={() => navigate(`/chat/${otherUid}${chat.type === 'evaluation' ? '?evaluate=true' : chat.type === 'help' ? '?session=help' : ''}`)}
-                  className="bg-hmo-card border border-hmo-border p-6 rounded-[2rem] cursor-pointer hover:border-primary/30 transition-all flex items-center gap-5 group"
+                  className="hmo-card border border-hmo-border p-6 rounded-[2rem] cursor-pointer hover:border-primary/30 transition-all flex items-center gap-5 group shadow-xl dark:shadow-none"
                 >
                   {/* Avatar */}
                   <div className="relative">
-                    <div className="w-14 h-14 rounded-2xl bg-slate-800 flex items-center justify-center font-black text-slate-500 text-xl border border-hmo-border shadow-inner group-hover:bg-slate-700 transition-colors">
+                    <div className="w-14 h-14 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center font-black hmo-text-muted text-xl border border-hmo-border shadow-inner group-hover:bg-slate-100 dark:group-hover:bg-slate-700 transition-colors">
                       {otherName[0]?.toUpperCase()}
                     </div>
                     {isSupport && (
@@ -146,7 +146,7 @@ const ChatList: React.FC = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start mb-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-white font-black text-base">@{otherName}</span>
+                        <span className="hmo-text-primary font-black text-base">@{otherName}</span>
                         {isEvaluation && (
                           <span className="text-[8px] bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 px-1.5 py-0.5 rounded font-black uppercase tracking-widest">Eval</span>
                         )}
@@ -154,12 +154,12 @@ const ChatList: React.FC = () => {
                           <span className="text-[8px] bg-primary/10 text-primary border border-primary/20 px-1.5 py-0.5 rounded font-black uppercase tracking-widest">Support</span>
                         )}
                       </div>
-                      <div className="flex items-center gap-1 text-[10px] text-slate-600 font-bold uppercase tracking-tighter">
+                      <div className="flex items-center gap-1 text-[10px] hmo-text-muted font-bold uppercase tracking-tighter">
                         <Clock size={10} />
                         {chat.lastActivity?.toDate ? chat.lastActivity.toDate().toLocaleDateString() : 'Just now'}
                       </div>
                     </div>
-                    <p className="text-slate-500 text-sm line-clamp-1 italic font-medium leading-relaxed">
+                    <p className="hmo-text-secondary text-sm line-clamp-1 italic font-medium leading-relaxed">
                       {chat.lastMessage || "Click to start the conversation..."}
                     </p>
                   </div>
@@ -176,13 +176,13 @@ const ChatList: React.FC = () => {
 
         {/* Security Footer */}
         <div className="mt-12 p-6 bg-primary/5 border border-primary/10 rounded-[2rem] flex items-center gap-4">
-          <div className="p-3 bg-white/5 rounded-2xl text-primary">
+          <div className="p-3 bg-slate-50 dark:bg-white/5 rounded-2xl text-primary">
             <Shield size={24} />
           </div>
           <div>
-            <h4 className="text-white font-black uppercase tracking-tighter text-sm mb-0.5">Safe Space Shield</h4>
-            <p className="text-slate-600 text-xs font-medium leading-relaxed">
-              Conversations are private and encrypted. Staff will only review chats if a <span className="text-red-500/70">formal report</span> is filed for your safety.
+            <h4 className="hmo-text-primary font-black uppercase tracking-tighter text-sm mb-0.5">Safe Space Shield</h4>
+            <p className="hmo-text-secondary text-xs font-medium leading-relaxed">
+              Conversations are private and encrypted. Staff will only review chats if a <span className="text-red-500/70 font-bold">formal report</span> is filed for your safety.
             </p>
           </div>
         </div>

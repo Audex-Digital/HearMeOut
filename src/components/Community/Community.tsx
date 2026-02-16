@@ -10,26 +10,26 @@ const Community: React.FC = () => {
     <section id="community" className="py-20 sm:py-32 bg-hmo-dark overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6">
         <motion.div 
-          className="bg-white/[0.02] border border-hmo-border rounded-[2.5rem] sm:rounded-[3rem] p-8 sm:p-12 md:p-16 grid grid-cols-1 lg:grid-cols-2 gap-12 sm:gap-16 items-center mb-16 sm:mb-24 shadow-2xl"
+          className="hmo-card p-8 sm:p-12 md:p-16 grid grid-cols-1 lg:grid-cols-2 gap-12 sm:gap-16 items-center mb-16 sm:mb-24 shadow-2xl dark:shadow-none"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
         >
           <div className="order-2 lg:order-1">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-6 sm:mb-8 leading-tight">You Are Not Alone</h2>
-            <p className="text-lg text-slate-400 leading-relaxed mb-6">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold hmo-text-primary mb-6 sm:mb-8 leading-tight">You Are Not Alone</h2>
+            <p className="text-lg hmo-text-secondary leading-relaxed mb-6">
               Whether you're a student feeling overwhelmed, a young adult 
               navigating life's uncertainties, or just someone who feels a bit 
               misunderstood—HearMeOut is for you.
             </p>
-            <p className="text-lg font-medium text-slate-300 mb-8 sm:mb-10">
-              We're building a generation that values <span className="text-primary">empathy over exposure.</span>
+            <p className="text-lg font-medium hmo-text-secondary mb-8 sm:mb-10">
+              We're building a generation that values <span className="text-primary font-bold">empathy over exposure.</span>
             </p>
             
             <div className="flex flex-wrap gap-3 mt-8 sm:mt-10">
               {tags.map((tag, index) => (
-                <span key={index} className="bg-white/5 border border-white/10 px-4 py-2 rounded-full text-sm text-slate-400 hover:text-white hover:border-white/20 transition-all cursor-default">
+                <span key={index} className="hmo-button-ghost px-4 py-2 rounded-full text-sm cursor-default">
                   {tag}
                 </span>
               ))}
@@ -54,7 +54,7 @@ const Community: React.FC = () => {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
-            className="text-xl sm:text-2xl font-bold text-white mb-8 sm:mb-10"
+            className="text-xl sm:text-2xl font-bold hmo-text-primary mb-8 sm:mb-10"
           >
             Ready to find your safe space?
           </motion.h3>

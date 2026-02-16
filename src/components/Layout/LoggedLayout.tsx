@@ -61,13 +61,13 @@ const LoggedLayout: React.FC<LoggedLayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#05070a] pt-28 pb-10">
+    <div className="min-h-screen bg-hmo-dark pt-28 pb-10 transition-colors duration-300">
       <div className="container mx-auto px-4 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_280px] gap-8">
           
           {/* Left Sidebar (Desktop Only) */}
           <aside className="hidden lg:flex flex-col gap-6 sticky top-28 h-fit">
-            <div className="bg-hmo-card border border-hmo-border rounded-3xl p-6">
+            <div className="hmo-card p-6">
               <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-6">Categories</h3>
               <ul className="space-y-6">
                 {categories.map((cat) => (
@@ -80,7 +80,7 @@ const LoggedLayout: React.FC<LoggedLayoutProps> = ({ children }) => {
                     }}
                   >
                     <div className={`w-2 h-2 rounded-full ${cat.color} ${!cat.disabled && 'group-hover:scale-125'} transition-transform`} />
-                    <span className={`text-sm font-bold ${cat.disabled ? 'text-slate-600' : 'text-slate-300 group-hover:text-white'} transition-colors`}>
+                    <span className={`text-sm font-bold ${cat.disabled ? 'hmo-text-muted' : 'hmo-text-secondary group-hover:hmo-text-primary'} transition-colors`}>
                       {cat.name}
                       {cat.premium && !cat.disabled && <span className="ml-2 text-[8px] bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 rounded uppercase tracking-tighter">Premium</span>}
                       {cat.disabled && <span className="ml-2 text-[8px] bg-white/5 text-slate-600 px-1.5 py-0.5 rounded uppercase tracking-tighter italic">Soon</span>}
@@ -112,7 +112,7 @@ const LoggedLayout: React.FC<LoggedLayoutProps> = ({ children }) => {
             {/* Mobile/Tablet categories and help banner (Visible only on < lg) */}
             <div className="flex lg:hidden flex-col gap-6 mb-8">
               {/* Compact horizontal categories for mobile */}
-              <div className="bg-hmo-card border border-hmo-border rounded-3xl p-6 overflow-hidden">
+              <div className="hmo-card p-6 overflow-hidden">
                 <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4">Categories</h3>
                 <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
                   {categories.map((cat) => (
@@ -123,7 +123,7 @@ const LoggedLayout: React.FC<LoggedLayoutProps> = ({ children }) => {
                       className={`flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl border transition-all ${cat.disabled ? 'opacity-40 grayscale border-hmo-border' : 'border-indigo-500/30 bg-indigo-500/5 active:scale-95'}`}
                     >
                       <div className={`w-1.5 h-1.5 rounded-full ${cat.color}`} />
-                      <span className="text-xs font-bold text-slate-300 whitespace-nowrap">{cat.name}</span>
+                      <span className="text-xs font-bold hmo-text-secondary whitespace-nowrap">{cat.name}</span>
                     </button>
                   ))}
                 </div>
@@ -149,20 +149,20 @@ const LoggedLayout: React.FC<LoggedLayoutProps> = ({ children }) => {
 
           {/* Right Sidebar (Desktop Only) */}
           <aside className="hidden lg:flex flex-col gap-6 sticky top-28 h-fit">
-            <div className="bg-hmo-card border border-hmo-border rounded-3xl p-6">
+            <div className="hmo-card p-6">
               <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-6">Community Rules</h3>
               <ul className="space-y-4">
                 {rules.map((rule, idx) => (
                   <li key={idx} className="flex items-start gap-3">
                     <div className="mt-1.5 w-1 h-1 rounded-full bg-primary shrink-0" />
-                    <span className="text-xs font-medium text-slate-400 leading-relaxed">{rule}</span>
+                    <span className="text-xs font-medium hmo-text-secondary leading-relaxed">{rule}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
             <div className="px-6">
-              <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">
+              <p className="text-[10px] font-bold hmo-text-muted uppercase tracking-widest">
                 © 2026 HearMeOut
               </p>
             </div>

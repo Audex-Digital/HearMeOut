@@ -130,13 +130,13 @@ const Bookmarks: React.FC = () => {
   return (
     <LoggedLayout>
       <div className="max-w-2xl mx-auto">
-        <div className="mb-8 flex items-center gap-4 px-6 py-5 bg-white/[0.02] border border-hmo-border rounded-[2.5rem]">
+        <div className="mb-8 flex items-center gap-4 px-6 py-5 hmo-card dark:bg-white/[0.02] shadow-xl dark:shadow-none">
           <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-lg shadow-primary/5">
             <Bookmark size={24} fill="currentColor" />
           </div>
           <div>
-            <h1 className="text-xl font-black text-white tracking-tight">Your Saved Posts</h1>
-            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Quiet reflections you've held onto.</p>
+            <h1 className="text-xl font-black hmo-text-primary tracking-tight">Your Saved Posts</h1>
+            <p className="text-[10px] hmo-text-muted font-bold uppercase tracking-widest mt-0.5">Quiet reflections you've held onto.</p>
           </div>
         </div>
 
@@ -144,7 +144,7 @@ const Bookmarks: React.FC = () => {
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
               <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-              <p className="text-slate-500 text-xs font-bold uppercase tracking-widest animate-pulse">Gathering Bookmarks...</p>
+              <p className="hmo-text-muted text-xs font-bold uppercase tracking-widest animate-pulse">Gathering Bookmarks...</p>
             </div>
           ) : posts.length > 0 ? (
             posts.map((post) => (
@@ -160,12 +160,12 @@ const Bookmarks: React.FC = () => {
               />
             ))
           ) : (
-            <div className="text-center py-24 px-8 bg-hmo-card border border-dashed border-hmo-border rounded-[2.5rem] flex flex-col items-center">
-              <div className="w-16 h-16 bg-white/[0.02] rounded-full flex items-center justify-center text-slate-700 mb-6">
+            <div className="text-center py-24 px-8 hmo-card border-dashed border-hmo-border flex flex-col items-center">
+              <div className="w-16 h-16 bg-slate-50 dark:bg-white/[0.02] rounded-full flex items-center justify-center hmo-text-muted opacity-30 mb-6">
                  <Bookmark size={32} />
               </div>
-              <h3 className="text-white font-bold mb-2">No bookmarks found</h3>
-              <p className="text-slate-500 text-sm max-w-xs leading-relaxed italic">
+              <h3 className="hmo-text-primary font-bold mb-2">No bookmarks found</h3>
+              <p className="hmo-text-secondary text-sm max-w-xs leading-relaxed italic">
                 Save posts that resonate with you to find them easily later.
               </p>
             </div>

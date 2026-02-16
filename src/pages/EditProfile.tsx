@@ -47,7 +47,7 @@ const EditProfile: React.FC = () => {
       <div className="max-w-xl mx-auto">
         <button 
           onClick={() => navigate('/profile')}
-          className="flex items-center gap-2 text-slate-500 hover:text-white transition-colors mb-6 text-[10px] font-black uppercase tracking-[0.2em]"
+          className="flex items-center gap-2 hmo-text-muted hover:hmo-text-primary transition-colors mb-6 text-[10px] font-black uppercase tracking-[0.2em]"
         >
           <ChevronLeft size={16} />
           Profile Overview
@@ -56,30 +56,30 @@ const EditProfile: React.FC = () => {
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-hmo-card border border-hmo-border rounded-[2.5rem] p-8 sm:p-12 shadow-2xl"
+          className="hmo-card p-8 sm:p-12 shadow-2xl dark:shadow-none"
         >
           <header className="mb-10">
-            <h1 className="text-xl font-black text-white leading-tight uppercase tracking-widest">Settings</h1>
-            <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mt-2">Manage your anonymous identity</p>
+            <h1 className="text-xl font-black hmo-text-primary leading-tight uppercase tracking-widest">Settings</h1>
+            <p className="hmo-text-muted text-xs font-bold uppercase tracking-wider mt-2">Manage your anonymous identity</p>
           </header>
 
           <div className="space-y-10">
             {/* Read-Only Username Field */}
             <div>
-              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 ml-1">Handle (Immutable)</label>
-              <div className="w-full px-6 py-4 bg-[#05070a]/50 border border-hmo-border rounded-2xl text-slate-400 cursor-not-allowed text-sm font-bold">
+              <label className="block text-[10px] font-black hmo-text-muted uppercase tracking-widest mb-4 ml-1">Handle (Immutable)</label>
+              <div className="w-full px-6 py-4 bg-slate-50 dark:bg-[#05070a]/50 border border-hmo-border rounded-2xl hmo-text-muted cursor-not-allowed text-sm font-bold">
                 @{user.username}
               </div>
             </div>
 
             {/* Editable Bio Field */}
             <div>
-              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 ml-1">About Me</label>
+              <label className="block text-[10px] font-black hmo-text-muted uppercase tracking-widest mb-4 ml-1">About Me</label>
               <textarea 
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
                 placeholder="Share a piece of your journey..."
-                className="w-full h-40 px-6 py-6 bg-[#05070a]/50 border border-hmo-border rounded-3xl text-white placeholder:text-slate-700 focus:outline-none focus:border-primary/50 transition-all resize-none text-sm leading-relaxed font-medium"
+                className="w-full h-40 px-6 py-6 bg-slate-50 dark:bg-[#05070a]/50 border border-hmo-border rounded-3xl hmo-text-primary placeholder:hmo-text-muted focus:outline-none focus:border-primary/50 transition-all resize-none text-sm leading-relaxed font-medium"
               />
             </div>
 

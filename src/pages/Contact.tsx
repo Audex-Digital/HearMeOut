@@ -41,8 +41,8 @@ const Contact: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-16"
           >
-            <h1 className="text-4xl sm:text-5xl font-bold text-white mb-6">Get in Touch</h1>
-            <p className="text-slate-400 text-lg max-w-2xl mx-auto">
+            <h1 className="text-4xl sm:text-5xl font-bold hmo-text-primary mb-6">Get in Touch</h1>
+            <p className="hmo-text-secondary text-lg max-w-2xl mx-auto">
               Have questions or need support? We're here to help you maintain your safe space.
             </p>
           </motion.div>
@@ -59,9 +59,9 @@ const Contact: React.FC = () => {
                   <Mail size={24} />
                 </div>
                 <div>
-                  <h3 className="text-white font-bold mb-1">Email Us</h3>
-                  <p className="text-slate-400 text-sm">audexdigital26@gmail.com</p>
-                  <p className="text-slate-400 text-sm italic mt-1">Response within 24 hours</p>
+                  <h3 className="hmo-text-primary font-bold mb-1">Email Us</h3>
+                  <p className="hmo-text-secondary text-sm">audexdigital26@gmail.com</p>
+                  <p className="hmo-text-muted text-sm italic mt-1 font-medium">Response within 24 hours</p>
                 </div>
               </div>
 
@@ -70,9 +70,9 @@ const Contact: React.FC = () => {
                   <MapPin size={24} />
                 </div>
                 <div>
-                  <h3 className="text-white font-bold mb-1">Our Location</h3>
-                  <p className="text-slate-400 text-sm">Remote-First Community</p>
-                  <p className="text-slate-400 text-sm italic mt-1">Global Presence</p>
+                  <h3 className="hmo-text-primary font-bold mb-1">Our Location</h3>
+                  <p className="hmo-text-secondary text-sm">Remote-First Community</p>
+                  <p className="hmo-text-muted text-sm italic mt-1 font-medium">Global Presence</p>
                 </div>
               </div>
 
@@ -81,9 +81,9 @@ const Contact: React.FC = () => {
                   <Phone size={24} />
                 </div>
                 <div>
-                  <h3 className="text-white font-bold mb-1">Emergency Hotline</h3>
-                  <p className="text-slate-400 text-sm">Available for critical support</p>
-                  <p className="text-primary font-bold mt-1 text-sm underline">View Resources</p>
+                  <h3 className="hmo-text-primary font-bold mb-1">Emergency Hotline</h3>
+                  <p className="hmo-text-secondary text-sm font-medium">Available for critical support</p>
+                  <p className="text-primary font-bold mt-1 text-sm underline cursor-pointer">View Resources</p>
                 </div>
               </div>
             </motion.div>
@@ -93,7 +93,7 @@ const Contact: React.FC = () => {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-hmo-card border border-hmo-border p-8 rounded-[2.5rem] space-y-5 shadow-2xl"
+              className="hmo-card p-8 shadow-2xl dark:shadow-none space-y-5"
             >
               <div className="space-y-2">
                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Full Name</label>
@@ -103,7 +103,7 @@ const Contact: React.FC = () => {
                   onChange={handleChange}
                   type="text" 
                   placeholder="John Doe"
-                  className="w-full bg-hmo-dark border border-hmo-border rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-primary/50 transition-all text-sm font-medium"
+                  className="w-full bg-slate-50 dark:bg-hmo-dark border border-hmo-border rounded-2xl py-4 px-6 hmo-text-primary placeholder:hmo-text-muted focus:outline-none focus:border-primary/50 transition-all text-sm font-medium"
                 />
               </div>
               <div className="space-y-2">
@@ -125,7 +125,7 @@ const Contact: React.FC = () => {
                   onChange={handleChange}
                   rows={4}
                   placeholder="How can we help?"
-                  className="w-full bg-hmo-dark border border-hmo-border rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-primary/50 transition-all text-sm font-medium resize-none"
+                  className="w-full bg-slate-50 dark:bg-hmo-dark border border-hmo-border rounded-2xl py-4 px-6 hmo-text-primary placeholder:hmo-text-muted focus:outline-none focus:border-primary/50 transition-all text-sm font-medium resize-none shadow-inner"
                 ></textarea>
               </div>
               <button 

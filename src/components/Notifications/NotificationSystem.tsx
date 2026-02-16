@@ -153,12 +153,12 @@ const NotificationSystem: React.FC = () => {
               </div>
               
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-slate-300 leading-snug">
+                <p className="text-xs hmo-text-secondary leading-snug">
                   {notif.fromUsername && (
                     <Link 
                       to={notif.type === 'chat_message' ? `/chat/${notif.fromUserId}` : `/profile/@${notif.fromUsername}`}
                       onClick={() => markAsRead(notif.id)}
-                      className="text-white font-bold hover:underline"
+                      className="hmo-text-primary font-bold hover:underline"
                     >
                       {notif.fromUsername}
                     </Link>
@@ -167,7 +167,7 @@ const NotificationSystem: React.FC = () => {
                     <Link 
                       to={`/chat/${notif.applicantUid}?evaluate=true`}
                       onClick={() => markAsRead(notif.id)}
-                      className="text-white font-bold hover:underline"
+                      className="hmo-text-primary font-bold hover:underline"
                     >
                       {notif.applicantUsername}
                     </Link>
@@ -177,7 +177,7 @@ const NotificationSystem: React.FC = () => {
                   {notif.type === 'chat_message' && (
                     <>
                       {' sent a message: '}
-                      <span className="text-slate-400 italic">"{notif.text}"</span>
+                      <span className="hmo-text-muted italic">"{notif.text}"</span>
                     </>
                   )}
                   {notif.type === 'friend_request' && ' wants to connect'}
@@ -185,12 +185,12 @@ const NotificationSystem: React.FC = () => {
                   {notif.type === 'listener_approved' && 'Your listener application was approved! 🎉'}
                   {notif.type === 'listener_rejected' && 'Your listener application was rejected.'}
                 </p>
-                <span className="text-[10px] text-slate-500 mt-1 block">Just now</span>
+                <span className="text-[10px] hmo-text-muted mt-1 block font-medium">Just now</span>
               </div>
 
               <button 
                 onClick={() => markAsRead(notif.id)}
-                className="text-slate-600 hover:text-white transition-colors"
+                className="hmo-text-muted hover:hmo-text-primary transition-colors"
               >
                 <X size={14} />
               </button>
@@ -207,7 +207,7 @@ const NotificationSystem: React.FC = () => {
                 </button>
                 <button 
                   onClick={() => handleAction(notif, 'reject')}
-                  className="flex-1 flex items-center justify-center gap-2 bg-white/5 border border-hmo-border text-slate-300 py-1.5 rounded-lg text-xs font-bold hover:bg-white/10 transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 bg-slate-50/50 dark:bg-white/5 border border-hmo-border hmo-text-secondary py-1.5 rounded-lg text-xs font-bold hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
                 >
                   Decline
                 </button>
@@ -218,7 +218,7 @@ const NotificationSystem: React.FC = () => {
             {notif.type !== 'friend_request' && (
               <button 
                 onClick={() => markAsRead(notif.id)}
-                className="w-full mt-3 py-1.5 bg-white/5 border border-hmo-border rounded-lg text-[10px] font-bold text-slate-400 hover:text-white hover:bg-white/10 transition-all opacity-0 group-hover:opacity-100"
+                className="w-full mt-3 py-1.5 bg-slate-50 dark:bg-white/5 border border-hmo-border rounded-lg text-[10px] font-bold hmo-text-muted hover:hmo-text-primary hover:bg-slate-100 dark:hover:bg-white/10 transition-all opacity-0 group-hover:opacity-100"
               >
                 Dismiss
               </button>

@@ -149,7 +149,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose }
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 bottom-0 w-full max-w-sm bg-hmo-card border-l border-hmo-border shadow-[0_0_50px_rgba(0,0,0,0.5)] z-[70] flex flex-col"
+            className="fixed top-0 right-0 bottom-0 w-full max-w-sm hmo-card border-l shadow-[0_0_50px_rgba(0,0,0,0.2)] dark:shadow-[0_0_50px_rgba(0,0,0,0.5)] z-[70] flex flex-col"
           >
             {/* Header */}
             <div className="p-6 border-b border-hmo-border flex items-center justify-between bg-white/[0.01]">
@@ -157,11 +157,11 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose }
                 <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                   <Bell size={18} fill="currentColor" />
                 </div>
-                <h2 className="text-lg font-black text-white tracking-tight uppercase">Activity</h2>
+                <h2 className="text-lg font-black hmo-text-primary tracking-tight uppercase">Activity</h2>
               </div>
               <button 
                 onClick={onClose} 
-                className="p-2 text-slate-500 hover:text-white hover:bg-white/5 rounded-xl transition-all"
+                className="p-2 hmo-text-secondary hover:hmo-text-primary hover:bg-slate-100 dark:hover:bg-white/5 rounded-xl transition-all"
               >
                 <X size={24} />
               </button>
@@ -172,15 +172,15 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose }
               {loading ? (
                 <div className="flex flex-col items-center justify-center h-64 gap-4">
                   <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin"></div>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Syncing History...</p>
+                  <p className="text-[10px] hmo-text-muted font-bold uppercase tracking-widest">Syncing History...</p>
                 </div>
               ) : notifications.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-[60vh] opacity-50 px-12 text-center">
-                  <div className="w-20 h-20 bg-white/[0.02] rounded-full flex items-center justify-center mb-6">
-                    <Inbox size={40} className="text-slate-700" />
+                  <div className="w-20 h-20 bg-slate-50 dark:bg-white/[0.02] rounded-full flex items-center justify-center mb-6 border border-hmo-border/50">
+                    <Inbox size={40} className="hmo-text-muted opacity-30" />
                   </div>
-                  <h3 className="text-white font-bold text-sm mb-2 uppercase tracking-wide">Nothing here yet</h3>
-                  <p className="text-xs text-slate-400 leading-relaxed font-medium">
+                  <h3 className="hmo-text-primary font-bold text-sm mb-2 uppercase tracking-wide">Nothing here yet</h3>
+                  <p className="text-xs hmo-text-secondary leading-relaxed font-medium">
                     When people support your posts or send connection requests, you'll see them here.
                   </p>
                 </div>
@@ -209,11 +209,11 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose }
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-slate-300 leading-relaxed font-medium">
+                        <p className="text-sm hmo-text-secondary leading-relaxed font-medium">
                           <Link 
                             to={notif.type === 'chat_message' ? `/chat/${notif.fromUserId}` : `/profile/@${notif.fromUsername}`} 
                             onClick={onClose}
-                            className="text-white font-bold hover:text-primary transition-colors"
+                            className="hmo-text-primary font-bold hover:text-primary transition-colors"
                           >
                             {notif.fromUsername}
                           </Link>
@@ -222,7 +222,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose }
                           {notif.type === 'chat_message' && (
                             <>
                               {' sent a message: '}
-                              <span className="text-slate-400 italic">"{notif.text}"</span>
+                              <span className="hmo-text-primary italic font-bold">"{notif.text}"</span>
                             </>
                           )}
                           {notif.type === 'friend_request' && ' wants to connect'}
@@ -232,8 +232,8 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose }
                         </p>
                         
                         <div className="flex items-center gap-2 mt-2 opacity-60">
-                          <Clock size={12} className="text-slate-500" />
-                          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
+                          <Clock size={12} className="hmo-text-muted" />
+                          <span className="text-[10px] hmo-text-muted font-bold uppercase tracking-widest">
                             {getRelativeTime(notif.createdAt)}
                           </span>
                         </div>
@@ -252,7 +252,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose }
                             </button>
                             <button 
                               onClick={() => rejectFriendRequest(notif.fromUserId)}
-                              className="px-5 py-2 bg-white/5 border border-hmo-border text-slate-300 rounded-xl text-xs font-black uppercase tracking-tight hover:bg-white/10 transition-all active:scale-95"
+                              className="px-5 py-2 hmo-button-ghost rounded-xl text-xs font-black uppercase tracking-tight"
                             >
                               Decline
                             </button>
@@ -266,8 +266,8 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose }
             </div>
             
             {/* Footer Insight */}
-            <div className="p-6 border-t border-hmo-border bg-white/[0.01]">
-              <p className="text-[9px] text-center text-slate-600 font-bold uppercase tracking-[0.2em] leading-relaxed">
+            <div className="p-6 border-t border-hmo-border bg-slate-50 dark:bg-white/[0.01]">
+              <p className="text-[9px] text-center hmo-text-muted font-bold uppercase tracking-[0.2em] leading-relaxed">
                 Stay compassionate • Stay anonymous
               </p>
             </div>
